@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 640" role="img" aria-label="Bukti transfer dummy">
+  <rect width="480" height="640" fill="#0d1117"/>
+  <rect x="44" y="35" width="392" height="570" rx="24" fill="#f8fafc"/>
+  <circle cx="240" cy="112" r="34" fill="#22c55e"/>
+  <path d="m222 112 12 12 25-29" fill="none" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="240" y="174" fill="#111827" font-family="Arial,sans-serif" font-size="25" font-weight="700" text-anchor="middle">TRANSFER BERHASIL</text>
+  <text x="240" y="215" fill="#6b7280" font-family="Arial,sans-serif" font-size="16" text-anchor="middle">DATA SIMULASI • BUKAN TRANSAKSI ASLI</text>
+  <line x1="78" y1="249" x2="402" y2="249" stroke="#d1d5db" stroke-dasharray="8 6"/>
+  <text x="78" y="297" fill="#6b7280" font-family="Arial,sans-serif" font-size="16">Nominal dummy</text>
+  <text x="402" y="297" fill="#111827" font-family="Arial,sans-serif" font-size="20" font-weight="700" text-anchor="end">Rp1.250.000</text>
+  <text x="78" y="346" fill="#6b7280" font-family="Arial,sans-serif" font-size="16">Penerima</text>
+  <text x="402" y="346" fill="#111827" font-family="Arial,sans-serif" font-size="17" text-anchor="end">AKUN DEMO KSP</text>
+  <text x="78" y="395" fill="#6b7280" font-family="Arial,sans-serif" font-size="16">Referensi</text>
+  <text x="402" y="395" fill="#111827" font-family="Arial,sans-serif" font-size="17" text-anchor="end">DEMO-000000</text>
+  <text x="78" y="444" fill="#6b7280" font-family="Arial,sans-serif" font-size="16">Tanggal dummy</text>
+  <text x="402" y="444" fill="#111827" font-family="Arial,sans-serif" font-size="17" text-anchor="end">21 Juli 2026, 10:30</text>
+  <rect x="78" y="493" width="324" height="62" rx="12" fill="#ecfdf5"/>
+  <text x="240" y="531" fill="#15803d" font-family="Arial,sans-serif" font-size="17" font-weight="700" text-anchor="middle">STATUS: BERHASIL</text>
+</svg>

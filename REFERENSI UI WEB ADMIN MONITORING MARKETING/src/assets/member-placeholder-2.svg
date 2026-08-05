@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="Avatar anggota">
+  <rect width="480" height="320" fill="#121820"/>
+  <circle cx="240" cy="128" r="82" fill="#1a2235" stroke="#e8c65a" stroke-width="6"/>
+  <text x="240" y="151" fill="#e8c65a" font-family="Arial,sans-serif" font-weight="700" font-size="70" text-anchor="middle">AM</text>
+  <text x="240" y="265" fill="#a8b0bd" font-family="Arial,sans-serif" font-size="18" text-anchor="middle">DATA ANGGOTA</text>
+</svg>
