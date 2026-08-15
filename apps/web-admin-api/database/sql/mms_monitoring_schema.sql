@@ -513,4 +513,33 @@ CREATE TABLE `visit_reports` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+-- Customer web-admin revision, 2026-08-15.
+-- This schema export contains no user records, password hashes, tokens, or credentials.
+ALTER TABLE `marketing_profiles`
+  DROP FOREIGN KEY `marketing_profiles_user_id_foreign`;
+ALTER TABLE `marketing_profiles`
+  MODIFY `user_id` bigint unsigned NULL;
+ALTER TABLE `marketing_profiles`
+  ADD CONSTRAINT `marketing_profiles_user_id_foreign`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+CREATE TABLE `operational_report_attachments` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `daily_operational_report_id` bigint unsigned NOT NULL,
+  `type` varchar(30) NOT NULL,
+  `photo_path` varchar(255) NOT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  `uploaded_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_operational_attachments_type_uploaded` (`type`,`uploaded_at`),
+  KEY `fk_op_attachment_report` (`daily_operational_report_id`),
+  CONSTRAINT `fk_op_attachment_report` FOREIGN KEY (`daily_operational_report_id`) REFERENCES `daily_operational_reports` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `marketing_profiles` ADD `display_name` varchar(150) NULL AFTER `user_id`;
+ALTER TABLE `daily_operational_reports` ADD `incoming_member_count` smallint unsigned NOT NULL DEFAULT 0 AFTER `total_target_people`;
+ALTER TABLE `daily_operational_reports` ADD `outgoing_member_count` smallint unsigned NOT NULL DEFAULT 0 AFTER `incoming_member_count`;
+
 

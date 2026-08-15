@@ -18,6 +18,7 @@ class MarketingProfile extends Model
 
     protected $fillable = [
         'user_id',
+        'display_name',
         'code',
         'phone',
         'area',

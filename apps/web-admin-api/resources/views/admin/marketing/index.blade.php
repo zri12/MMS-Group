@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Marketing - '.config('mms.name'))
-@section('page_title', 'Data Marketing')
+@section('title', 'Pengaturan PDL - '.config('mms.name'))
+@section('page_title', 'Pengaturan PDL')
 
 @php
     $rupiah = fn (int $v): string => 'Rp '.number_format($v, 0, ',', '.');
@@ -37,12 +37,12 @@
         {{-- ── Page Header ── --}}
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h1 class="text-[22px] font-semibold text-[var(--mms-color-text)] sm:text-[26px]">Data Marketing</h1>
-                <p class="mt-0.5 text-[13px] text-[var(--mms-color-text-subtle)]">Kelola akun, area, hari kerja, dan status marketing.</p>
+                <h1 class="text-[22px] font-semibold text-[var(--mms-color-text)] sm:text-[26px]">Pengaturan PDL</h1>
+                <p class="mt-0.5 text-[13px] text-[var(--mms-color-text-subtle)]">Kelola akun, area, hari kerja, dan status PDL.</p>
             </div>
             <x-ui.link-button :href="route('admin.marketing.create')">
                 <svg class="mr-1.5 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14"/></svg>
-                Tambah Marketing
+                Tambah PDL
             </x-ui.link-button>
         </div>
 
@@ -50,7 +50,7 @@
         <div class="hidden lg:block">
             <form method="GET" action="{{ route('admin.marketing.index') }}" class="flex flex-wrap items-end gap-2">
                 <div class="min-w-[200px] flex-1">
-                    <label for="search-desktop" class="sr-only">Cari marketing</label>
+                            <label for="search-desktop" class="sr-only">Cari PDL</label>
                     <div class="relative">
                         <svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--mms-color-text-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0Z"/>
@@ -111,7 +111,7 @@
                         type="search"
                         name="search"
                         value="{{ $filters['search'] }}"
-                        placeholder="Cari marketing..."
+                        placeholder="Cari PDL..."
                         class="w-full rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface-muted)] py-2.5 pl-9 pr-4 text-[13px] text-[var(--mms-color-text)] placeholder:text-[var(--mms-color-text-subtle)] focus:border-[var(--mms-color-border-gold)] focus:outline-none focus:ring-2 focus:ring-[var(--mms-color-focus)]"
                     />
                     {{-- Preserve other filters when searching --}}
@@ -176,7 +176,7 @@
             <div class="mx-auto mt-3 h-1 w-12 rounded-full bg-white/20" aria-hidden="true"></div>
             <div class="flex items-center justify-between border-b border-[var(--mms-color-border)] px-4 pb-3 pt-4">
                 <div>
-                    <h2 id="marketing-filter-title" class="text-[16px] font-semibold text-[var(--mms-color-text)]">Filter Marketing</h2>
+                    <h2 id="marketing-filter-title" class="text-[16px] font-semibold text-[var(--mms-color-text)]">Filter PDL</h2>
                     @if ($mobileFilterCount > 0)
                         <p class="mt-0.5 text-[12px] text-[var(--mms-color-primary)]">{{ $mobileFilterCount }} filter aktif</p>
                     @endif
@@ -228,7 +228,7 @@
         @if ($profiles->isEmpty())
             <x-ui.empty-state
                 title="Belum ada marketing"
-                description="Tidak ada data marketing yang sesuai filter. Coba reset filter atau tambah marketing baru."
+                description="Belum ada PDL yang sesuai filter. Coba reset filter atau tambah PDL baru."
             />
         @else
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

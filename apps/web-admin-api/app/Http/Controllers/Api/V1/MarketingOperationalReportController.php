@@ -19,7 +19,7 @@ class MarketingOperationalReportController
     public function index(OperationalReportIndexRequest $request): JsonResponse
     {
         $paginator = DailyOperationalReport::query()
-            ->with('marketingProfile.user')
+            ->with(['marketingProfile.user', 'attachments'])
             ->where('marketing_profile_id', $request->user()->marketingProfile->id)
             ->when($request->filled('date_from'), fn (Builder $query) => $query->whereDate('report_date', '>=', $request->validated('date_from')))
             ->when($request->filled('date_to'), fn (Builder $query) => $query->whereDate('report_date', '<=', $request->validated('date_to')))
@@ -59,7 +59,7 @@ class MarketingOperationalReportController
 
         return ApiResponse::success(
             message: 'Detail laporan operasional berhasil dimuat.',
-            data: (new DailyOperationalReportResource($operationalReport->load('marketingProfile.user')))->resolve(),
+            data: (new DailyOperationalReportResource($operationalReport->load(['marketingProfile.user', 'attachments'])))->resolve(),
         );
     }
 }

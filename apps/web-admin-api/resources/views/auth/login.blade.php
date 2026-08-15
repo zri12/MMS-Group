@@ -3,7 +3,7 @@
 @section('title', 'Login Admin - '.config('mms.name'))
 
 @section('content')
-    <div class="grid min-h-[600px] overflow-hidden rounded-[1.5rem] border border-[var(--mms-color-border-strong)] bg-[var(--mms-color-surface)] shadow-[var(--mms-shadow-lg)] lg:min-h-dvh lg:grid-cols-[1.05fr_.95fr] lg:rounded-none lg:border-0">
+    <div class="grid min-h-[calc(100dvh-1.5rem)] w-full overflow-hidden rounded-[var(--mms-radius-xl)] border border-[var(--mms-color-border-strong)] bg-[var(--mms-color-surface)] shadow-[var(--mms-shadow-lg)] sm:min-h-[600px] sm:rounded-[1.5rem] lg:min-h-dvh lg:grid-cols-[1.05fr_.95fr] lg:rounded-none lg:border-0">
 
         {{-- Panel Kiri: Branding --}}
         <section class="relative hidden flex-col justify-between overflow-hidden border-r border-[var(--mms-color-border)] bg-[var(--mms-color-background-subtle)] p-[clamp(2.5rem,6vw,5rem)] lg:flex">
@@ -25,7 +25,7 @@
                 {{-- Feature chips (scope final) --}}
                 <div class="mt-8 flex flex-wrap gap-2.5" aria-label="Fitur tersedia">
                     @foreach ([
-                        ['label' => 'Tracking Lokasi',       'icon' => 'M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
+                        ['label' => 'Tracking PDL',          'icon' => 'M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Zm0-8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z'],
                         ['label' => 'Rencana Kerja',         'icon' => 'M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z'],
                         ['label' => 'Monitoring Marketing',  'icon' => 'M16 11a4 4 0 1 0-8 0m8 0a4 4 0 1 1-8 0m8 0v1a6 6 0 0 1-12 0v-1'],
                     ] as $chip)
@@ -43,16 +43,16 @@
         </section>
 
         {{-- Panel Kanan: Form Login --}}
-        <section class="flex items-center justify-center bg-[var(--mms-color-surface)] p-6 sm:p-10 lg:bg-[#070b0f] lg:p-14">
+        <section class="flex items-center justify-center bg-[var(--mms-color-surface)] px-5 py-8 sm:p-10 lg:bg-[#070b0f] lg:p-14">
             <div class="w-full max-w-[400px]">
 
                 {{-- Logo mobile only --}}
-                <div class="mb-8 lg:hidden">
+                <div class="mb-9 lg:hidden">
                     <x-ui.logo />
                     <p class="mt-3 text-[11px] font-semibold tracking-[.12em] text-[var(--mms-color-primary)]">KSP MANUNGGAL MAKMUR SEJAHTERA</p>
                 </div>
 
-                <div class="mb-7">
+                <div class="mb-8">
                     <p class="text-[11px] font-semibold tracking-[.18em] text-[var(--mms-color-primary)]">Akses Admin</p>
                     <h2 class="mt-3 text-[28px] font-semibold leading-tight tracking-[-0.02em] text-[var(--mms-color-text)]">Selamat Datang</h2>
                     <p class="mt-2 text-[13px] leading-relaxed text-[var(--mms-color-text-subtle)]">Masukkan username dan password untuk melanjutkan.</p>
@@ -82,7 +82,7 @@
                             required
                             placeholder="Masukkan username Anda"
                             :invalid="$errors->has('username')"
-                            class="min-h-[50px] rounded-[1.25rem] px-5 text-[14px]"
+                            class="min-h-[52px] rounded-[var(--mms-radius-lg)] px-5 text-[14px]"
                         />
                     </x-form.field>
 
@@ -94,7 +94,7 @@
                             required
                             placeholder="Masukkan password"
                             :invalid="$errors->has('password')"
-                            class="min-h-[50px] rounded-[1.25rem] px-5 pr-14 text-[14px]"
+                            class="min-h-[52px] rounded-[var(--mms-radius-lg)] px-5 pr-14 text-[14px]"
                         />
                     </x-form.field>
 
@@ -103,7 +103,7 @@
                             type="submit"
                             full-width="true"
                             x-bind:disabled="submitting"
-                            class="min-h-[50px] rounded-[0.875rem] text-[14px] font-semibold"
+                            class="min-h-[52px] rounded-[var(--mms-radius-lg)] text-[14px] font-semibold"
                         >
                             <span x-show="! submitting">Masuk</span>
                             <span x-cloak x-show="submitting">

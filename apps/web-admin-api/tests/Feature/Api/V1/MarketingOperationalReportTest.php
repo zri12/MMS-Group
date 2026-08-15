@@ -9,6 +9,8 @@ use App\Models\DailyOperationalReport;
 use App\Models\MarketingProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -75,6 +77,24 @@ class MarketingOperationalReportTest extends TestCase
         $this->withToken($token)
             ->getJson('/api/v1/operational-reports/'.$other->id)
             ->assertNotFound();
+    }
+
+    public function test_marketing_can_upload_distinct_operational_report_attachments(): void
+    {
+        Storage::fake('public');
+        [, $token] = $this->marketingToken('M01');
+
+        $response = $this->withToken($token)->post('/api/v1/operational-reports', $this->payload([
+            'attachments' => [
+                ['type' => 'disbursement', 'photo' => UploadedFile::fake()->image('disbursement.jpg'), 'caption' => 'Pencairan'],
+                ['type' => 'transfer_proof', 'photo' => UploadedFile::fake()->image('transfer.png'), 'caption' => 'Transfer'],
+            ],
+        ]));
+
+        $response->assertCreated();
+        $this->assertDatabaseCount('operational_report_attachments', 2);
+        $response->assertJsonPath('data.attachments.0.type', 'disbursement');
+        $this->assertDatabaseHas('operational_report_attachments', ['type' => 'transfer_proof', 'caption' => 'Transfer']);
     }
 
     public function test_operational_report_validation_rejects_negative_amount_without_accept_header(): void

@@ -10,7 +10,7 @@
 
             <div class="grid gap-4 md:grid-cols-2">
                 <x-form.field label="Marketing" for="marketing_profile_id" error="{{ $errors->first('marketing_profile_id') }}">
-                    <x-form.select id="marketing_profile_id" name="marketing_profile_id" placeholder="Pilih marketing">
+                    <x-form.select id="marketing_profile_id" name="marketing_profile_id" placeholder="Pilih PDL">
                         @foreach ($marketingOptions as $marketing)
                             <option value="{{ $marketing->id }}" @selected((int) old('marketing_profile_id', $schedule?->marketing_profile_id) === $marketing->id)>{{ $marketing->code }} - {{ $marketing->user->name }}</option>
                         @endforeach

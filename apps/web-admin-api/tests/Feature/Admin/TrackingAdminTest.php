@@ -43,7 +43,7 @@ class TrackingAdminTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/tracking?date=2026-07-20&status=Aktif')
             ->assertOk()
-            ->assertSee('Tracking Lokasi')
+            ->assertSee('Tracking PDL')
             ->assertSee('data-tracking-map', false)
             ->assertSee('M01 - Marketing M01')
             ->assertSee('Detail Tracking');

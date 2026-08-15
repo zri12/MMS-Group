@@ -66,7 +66,7 @@ class AdminNavigationExpansionTest extends TestCase
 
         $this->actingAs($admin)->get('/admin/schedules')
             ->assertOk()
-            ->assertSee('Jadwal Marketing')
+            ->assertSee('Jadwal PDL')
             ->assertSee('Kunjungan calon anggota');
 
         $this->actingAs($admin)->get('/admin/operational-recaps/'.$recap->id)

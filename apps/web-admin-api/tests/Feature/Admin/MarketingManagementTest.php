@@ -26,7 +26,7 @@ class MarketingManagementTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/marketing')
             ->assertOk()
-            ->assertSee('Data Marketing')
+            ->assertSee('Pengaturan PDL')
             ->assertSee($marketing->code)
             ->assertSee($marketing->user->name);
 

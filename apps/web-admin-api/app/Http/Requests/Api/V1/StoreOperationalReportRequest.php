@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use App\Enums\DayName;
+use App\Enums\OperationalAttachmentType;
 use Illuminate\Validation\Rule;
 
 class StoreOperationalReportRequest extends ApiFormRequest
@@ -37,9 +38,15 @@ class StoreOperationalReportRequest extends ApiFormRequest
             'outgoing_target_people' => ['required', 'integer', 'min:0'],
             'total_target_amount' => ['required', 'integer', 'min:0'],
             'total_target_people' => ['required', 'integer', 'min:0'],
+            'incoming_member_count' => ['nullable', 'integer', 'min:0'],
+            'outgoing_member_count' => ['nullable', 'integer', 'min:0'],
             'new_drop' => ['required', 'integer', 'min:0'],
             'continued_drop' => ['required', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'attachments' => ['nullable', 'array', 'max:2'],
+            'attachments.*.type' => ['required_with:attachments', 'string', Rule::in(array_map(fn (OperationalAttachmentType $type) => $type->value, OperationalAttachmentType::cases()))],
+            'attachments.*.photo' => ['required_with:attachments', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('mms.uploads.max_image_kb')],
+            'attachments.*.caption' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

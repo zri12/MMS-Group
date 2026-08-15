@@ -18,7 +18,7 @@
     @unless (filter_var($compact, FILTER_VALIDATE_BOOLEAN))
         <span class="min-w-0">
             <span class="block truncate text-sm font-semibold text-[var(--mms-color-text)]">KSP MMS</span>
-            <span class="mt-0.5 block truncate text-xs text-[var(--mms-color-text-muted)]">Marketing Monitoring</span>
+            <span class="mt-0.5 block truncate text-xs text-[var(--mms-color-text-muted)]">PDL Monitoring</span>
         </span>
     @endunless
 </div>

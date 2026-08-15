@@ -100,16 +100,27 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/dashboard?date=2026-07-20&day=Senin');
 
         $response->assertOk();
-        $response->assertSee('Selamat bekerja, Admin MMS');
+        $response->assertSee('Dashboard Admin');
+        $response->assertSee('Drop');
+        $response->assertSee('Storting');
+        $response->assertSee('Sirkulasi');
+        $response->assertSee('Target Masuk');
+        $response->assertSee('Target Keluar');
+        $response->assertSee('Total Target');
+        $response->assertSee('Anggota Masuk');
+        $response->assertSee('Anggota Keluar');
+        $response->assertSee('Foto Pencairan');
+        $response->assertSee('Foto Bukti Transfer');
+        $response->assertSee('PDL');
+        $response->assertSee('Tracking PDL');
+        $response->assertDontSee('Status Marketing');
         $response->assertSee('Rp 10.000.000');
         $response->assertSee('Rp 6.500.000');
         $response->assertSee('Rp 3.000.000');
-        $response->assertSee('Presentasi produk tabungan');
-        $response->assertSee('Aktif');
         $response->assertSee('M01');
     }
 
-    public function test_dashboard_marketing_filter_limits_totals(): void
+    public function test_dashboard_uses_global_period_totals(): void
     {
         $admin = User::factory()->admin()->create();
         $marketing = $this->marketingProfile('M01');
@@ -131,8 +142,7 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin/dashboard?date=2026-07-20&day=Senin&marketing_id='.$marketing->id);
 
         $response->assertOk();
-        $response->assertSee('Rp 8.000.000');
-        $response->assertDontSee('Rp 10.000.000');
+        $response->assertSee('Rp 10.000.000');
     }
 
     public function test_dashboard_empty_state_and_admin_alias_are_safe(): void
@@ -142,14 +152,14 @@ class DashboardTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin')
             ->assertOk()
-            ->assertSee('Selamat bekerja, Admin MMS');
+            ->assertSee('Dashboard Admin');
 
         $this->actingAs($admin)
             ->get('/admin/dashboard?date=2026-07-21&day=Selasa')
             ->assertOk()
-            ->assertSee('Tidak ada jadwal')
-            ->assertSee('Belum ada laporan')
-            ->assertSee('Rekap belum tersedia');
+            ->assertSee('Belum ada PDL')
+            ->assertSee('Belum ada foto pencairan')
+            ->assertSee('Belum ada foto bukti transfer');
     }
 
     private function marketingProfile(string $code): MarketingProfile
@@ -162,6 +172,7 @@ class DashboardTest extends TestCase
         $profile = MarketingProfile::factory()->create([
             'user_id' => $user->id,
             'code' => $code,
+            'display_name' => 'Marketing '.$code,
             'area' => 'Gedebage',
         ]);
 

@@ -7,6 +7,7 @@ namespace App\Actions\Api\V1;
 use App\Enums\SyncStatus;
 use App\Models\DailyOperationalReport;
 use App\Models\MarketingProfile;
+use App\Models\OperationalReportAttachment;
 use App\Support\ApiResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
@@ -35,7 +36,7 @@ class CreateOperationalReportAction
                 return $existing;
             }
 
-            return DailyOperationalReport::query()->create([
+            $report = DailyOperationalReport::query()->create([
                 'local_uuid' => $data['local_uuid'],
                 'marketing_profile_id' => $marketing->id,
                 'report_date' => $data['date'],
@@ -54,11 +55,25 @@ class CreateOperationalReportAction
                 'outgoing_target_people' => $data['outgoing_target_people'],
                 'total_target_amount' => $data['total_target_amount'],
                 'total_target_people' => $data['total_target_people'],
+                'incoming_member_count' => $data['incoming_member_count'] ?? 0,
+                'outgoing_member_count' => $data['outgoing_member_count'] ?? 0,
                 'new_drop' => $data['new_drop'],
                 'continued_drop' => $data['continued_drop'],
                 'notes' => $data['notes'] ?? null,
                 'sync_status' => SyncStatus::Synced,
-            ])->load('marketingProfile.user');
+            ]);
+
+            foreach ($data['attachments'] ?? [] as $attachment) {
+                OperationalReportAttachment::query()->create([
+                    'daily_operational_report_id' => $report->id,
+                    'type' => $attachment['type'],
+                    'photo_path' => $attachment['photo']->store('operational-report-attachments', 'public'),
+                    'caption' => $attachment['caption'] ?? null,
+                    'uploaded_at' => now(),
+                ]);
+            }
+
+            return $report->load(['marketingProfile.user', 'attachments']);
         });
     }
 }
