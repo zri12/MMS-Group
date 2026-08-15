@@ -142,7 +142,11 @@ class TrackingController extends Controller
                     ->with(['schedule', 'latestPoint'])
                     ->latest('started_at'),
             ])
-            ->whereHas('user', fn (Builder $query) => $query->where('is_active', true))
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereHas('user', fn (Builder $userQuery) => $userQuery->where('is_active', true))
+                    ->orWhereNotNull('display_name');
+            })
             ->when($request->filled('marketing_id'), fn (Builder $query) => $query->whereKey($request->integer('marketing_id')))
             ->when($request->filled('day'), fn (Builder $query) => $query->whereHas('workDays', fn (Builder $query) => $query->where('day_name', $request->string('day')->toString())))
             ->when($status, fn (Builder $query) => $this->applyStatusFilter($query, $status, $date))

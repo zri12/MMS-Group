@@ -32,7 +32,11 @@ class MarketingProfile extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withDefault(function (User $user, MarketingProfile $profile): void {
+            $user->name = $profile->display_name ?? $profile->code;
+            $user->username = '';
+            $user->is_active = false;
+        });
     }
 
     public function workDays(): HasMany
