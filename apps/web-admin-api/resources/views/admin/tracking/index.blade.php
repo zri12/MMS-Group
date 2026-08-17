@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Tracking Lokasi - '.config('mms.name'))
-@section('page_title', 'Tracking Lokasi')
+@section('title', 'Tracking PDL - '.config('mms.name'))
+@section('page_title', 'Tracking PDL')
 
 @php
     $statusBg = fn (string $sv): string => match ($sv) {
@@ -40,7 +40,7 @@
         {{-- Page Header --}}
         <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
-                <h1 class="text-[22px] font-semibold text-[var(--mms-color-text)] sm:text-[24px]">Tracking Lokasi</h1>
+                <h1 class="text-[22px] font-semibold text-[var(--mms-color-text)] sm:text-[24px]">Tracking PDL</h1>
                 <p class="mt-0.5 text-[12px] text-[var(--mms-color-text-subtle)]">Pantau posisi real-time semua marketing. Update setiap {{ $pollingSeconds }}s.</p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -104,7 +104,7 @@
         <div class="flex items-center gap-2 lg:hidden">
             <button type="button" class="flex min-h-[44px] flex-1 items-center gap-2 rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface)] px-4 text-[13px] font-semibold text-[var(--mms-color-text-muted)]" x-on:click="pickerOpen = true" aria-haspopup="dialog" :aria-expanded="pickerOpen">
                 <svg class="size-4 shrink-0 text-[var(--mms-color-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7 8a7 7 0 0 0-14 0M17 8h4M19 6v4"/></svg>
-                <span>Pilih Marketing</span>
+                <span>Pilih PDL</span>
             </button>
             <button type="button" class="relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface)] px-3 text-[var(--mms-color-text-muted)]" x-on:click="filterOpen = true" aria-label="Buka filter" aria-haspopup="dialog" :aria-expanded="filterOpen">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-.293.707L13 13.414V19a1 1 0 0 1-.553.894l-4 2A1 1 0 0 1 7 21v-7.586L3.293 6.707A1 1 0 0 1 3 6V4Z"/></svg>
@@ -119,7 +119,7 @@
         <div role="dialog" aria-modal="true" aria-labelledby="picker-title" x-cloak x-show="pickerOpen" x-transition:enter="transition ease-out duration-220" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0" x-transition:leave="transition ease-in duration-160" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full" class="mms-sheet-panel mms-sheet-panel-tall lg:hidden">
             <div class="mx-auto mt-3 h-1 w-12 rounded-full bg-white/20" aria-hidden="true"></div>
             <div class="flex items-center justify-between border-b border-[var(--mms-color-border)] px-4 pb-3 pt-4">
-                <h2 id="picker-title" class="text-[16px] font-semibold text-[var(--mms-color-text)]">Pilih Marketing</h2>
+                <h2 id="picker-title" class="text-[16px] font-semibold text-[var(--mms-color-text)]">Pilih PDL</h2>
                 <button type="button" class="grid size-9 place-items-center rounded-full border border-[var(--mms-color-border)] text-[var(--mms-color-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--mms-color-focus)]" aria-label="Tutup picker" x-on:click="pickerOpen = false">
                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m6 6 12 12M18 6 6 18"/></svg>
                 </button>
@@ -196,13 +196,13 @@
 
             <div class="overflow-hidden rounded-[16px] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface)]">
                 <div class="border-b border-[var(--mms-color-border)] px-4 py-3">
-                    <h2 class="text-[14px] font-semibold text-[var(--mms-color-text)]">Status Marketing</h2>
+                    <h2 class="text-[14px] font-semibold text-[var(--mms-color-text)]">Status PDL</h2>
                     <p class="mt-0.5 text-[11px] text-[var(--mms-color-text-subtle)]">Filter tanggal: {{ \Carbon\CarbonImmutable::parse($filters['date'])->format('d/m/Y') }}</p>
                 </div>
 
                 @if ($rows->isEmpty())
                     <div class="px-4 py-8 text-center">
-                        <p class="text-[13px] text-[var(--mms-color-text-subtle)]">Tidak ada marketing sesuai filter.</p>
+                        <p class="text-[13px] text-[var(--mms-color-text-subtle)]">Belum ada PDL untuk ditampilkan.</p>
                     </div>
                 @else
                     <div class="mms-scrollbar space-y-0 divide-y divide-[var(--mms-color-border)] overflow-y-auto" style="max-height: 580px">

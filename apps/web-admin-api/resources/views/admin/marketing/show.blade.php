@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Marketing - '.config('mms.name'))
-@section('page_title', 'Detail Marketing')
+@section('title', 'Detail PDL - '.config('mms.name'))
+@section('page_title', 'Detail PDL')
 
 @php
     $rupiah = fn (int $value): string => 'Rp '.number_format($value, 0, ',', '.');
@@ -63,7 +63,7 @@
         </section>
 
         <section class="space-y-4">
-            <div class="mms-scrollbar flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Detail marketing">
+            <div class="mms-scrollbar flex gap-2 overflow-x-auto pb-2" role="tablist" aria-label="Detail PDL">
                 @foreach ($tabs as $key => $label)
                     <button
                         type="button"
@@ -116,7 +116,7 @@
             </div>
 
             <div x-show="activeTab === 'schedules'" x-cloak>
-                <x-ui.card title="Jadwal Marketing">
+                <x-ui.card title="Jadwal PDL">
                     <div class="grid gap-3 lg:grid-cols-2">
                         @forelse ($tabData['schedules'] as $schedule)
                             <article class="rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface-muted)] p-4">
@@ -137,7 +137,7 @@
             </div>
 
             <div x-show="activeTab === 'tracking'" x-cloak>
-                <x-ui.card title="Tracking Lokasi">
+                <x-ui.card title="Tracking PDL">
                     <div class="space-y-3">
                         @forelse ($tabData['tracking'] as $session)
                             <a href="{{ route('admin.tracking.show', $session) }}" class="block rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface-muted)] p-4 transition hover:border-[var(--mms-color-border-strong)]">

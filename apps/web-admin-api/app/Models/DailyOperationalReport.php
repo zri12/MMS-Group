@@ -10,6 +10,7 @@ use Database\Factories\DailyOperationalReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DailyOperationalReport extends Model
 {
@@ -35,6 +36,8 @@ class DailyOperationalReport extends Model
         'outgoing_target_people',
         'total_target_amount',
         'total_target_people',
+        'incoming_member_count',
+        'outgoing_member_count',
         'new_drop',
         'continued_drop',
         'notes',
@@ -58,6 +61,8 @@ class DailyOperationalReport extends Model
             'outgoing_target_people' => 'integer',
             'total_target_amount' => 'integer',
             'total_target_people' => 'integer',
+            'incoming_member_count' => 'integer',
+            'outgoing_member_count' => 'integer',
             'new_drop' => 'integer',
             'continued_drop' => 'integer',
             'sync_status' => SyncStatus::class,
@@ -67,5 +72,10 @@ class DailyOperationalReport extends Model
     public function marketingProfile(): BelongsTo
     {
         return $this->belongsTo(MarketingProfile::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(OperationalReportAttachment::class);
     }
 }

@@ -74,7 +74,7 @@ class ScheduleController extends Controller
 
         return redirect()
             ->route('admin.schedules.index')
-            ->with('flash_message', 'Jadwal marketing berhasil ditambahkan.');
+            ->with('flash_message', 'Jadwal PDL berhasil ditambahkan.');
     }
 
     public function edit(MarketingSchedule $schedule): View
@@ -90,7 +90,7 @@ class ScheduleController extends Controller
 
         return redirect()
             ->route('admin.schedules.index')
-            ->with('flash_message', 'Jadwal marketing berhasil diperbarui.');
+            ->with('flash_message', 'Jadwal PDL berhasil diperbarui.');
     }
 
     public function destroy(MarketingSchedule $schedule): RedirectResponse
@@ -99,7 +99,7 @@ class ScheduleController extends Controller
 
         return redirect()
             ->route('admin.schedules.index')
-            ->with('flash_message', 'Jadwal marketing berhasil dihapus.');
+            ->with('flash_message', 'Jadwal PDL berhasil dihapus.');
     }
 
     /**

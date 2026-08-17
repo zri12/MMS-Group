@@ -6,6 +6,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class DailyOperationalReportResource extends JsonResource
 {
@@ -33,10 +34,18 @@ class DailyOperationalReportResource extends JsonResource
             'outgoing_target_people' => $this->outgoing_target_people,
             'total_target_amount' => $this->total_target_amount,
             'total_target_people' => $this->total_target_people,
+            'incoming_member_count' => $this->incoming_member_count,
+            'outgoing_member_count' => $this->outgoing_member_count,
             'new_drop' => $this->new_drop,
             'continued_drop' => $this->continued_drop,
             'notes' => $this->notes,
             'sync_status' => $this->sync_status->value,
+            'attachments' => $this->whenLoaded('attachments', fn (): array => $this->attachments->map(fn ($attachment): array => [
+                'id' => $attachment->id,
+                'type' => $attachment->type->value,
+                'photo_url' => Storage::url($attachment->photo_path),
+                'caption' => $attachment->caption,
+            ])->all()),
             'marketing' => $this->whenLoaded('marketingProfile', fn (): array => [
                 'id' => $this->marketingProfile->id,
                 'code' => $this->marketingProfile->code,

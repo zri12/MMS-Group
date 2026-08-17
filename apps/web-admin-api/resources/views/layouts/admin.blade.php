@@ -17,7 +17,7 @@
         <div class="min-h-screen lg:pl-[var(--mms-sidebar-width)]">
             <x-navigation.topbar :user="auth()->user()" :title="$pageTitle" />
 
-            <main class="mx-auto w-full {{ $pageShellClass }} px-4 pb-[calc(var(--mms-mobile-nav-height)+1.5rem)] pt-6 sm:px-6 lg:px-8 lg:pb-10">
+            <main class="mx-auto w-full {{ $pageShellClass }} px-3 pb-[calc(var(--mms-mobile-nav-height)+max(1.25rem,env(safe-area-inset-bottom)))] pt-4 sm:px-6 sm:pt-6 lg:px-8 lg:pb-10">
                 <x-feedback.flash-messages class="mb-5" />
                 @yield('content')
             </main>

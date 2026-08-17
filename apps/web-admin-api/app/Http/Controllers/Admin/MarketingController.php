@@ -15,6 +15,7 @@ use App\Http\Requests\Admin\StoreMarketingRequest;
 use App\Http\Requests\Admin\UpdateMarketingRequest;
 use App\Http\Requests\Admin\UpdateMarketingStatusRequest;
 use App\Models\MarketingProfile;
+use App\Models\User;
 use App\Support\ProfilePhoto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -58,6 +59,8 @@ class MarketingController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $profiles->getCollection()->each(fn (MarketingProfile $profile) => $this->attachDisplayIdentity($profile));
+
         return view('admin.marketing.index', [
             'profiles' => $profiles,
             'days' => DayName::options(),
@@ -90,7 +93,7 @@ class MarketingController extends Controller
 
         return redirect()
             ->route('admin.marketing.show', $marketing)
-            ->with('flash_message', 'Data marketing berhasil ditambahkan.');
+            ->with('flash_message', 'PDL berhasil ditambahkan.');
     }
 
     public function show(MarketingProfile $marketing): View
@@ -101,6 +104,7 @@ class MarketingController extends Controller
             'latestTrackingSession',
             'latestTrackingSession.latestPoint',
         ]);
+        $this->attachDisplayIdentity($marketing);
 
         $scheduleItems = $marketing->schedules()
             ->with('prospect')
@@ -207,7 +211,7 @@ class MarketingController extends Controller
 
         return redirect()
             ->route('admin.marketing.show', $marketing)
-            ->with('flash_message', 'Data marketing berhasil diperbarui.');
+            ->with('flash_message', 'PDL berhasil diperbarui.');
     }
 
     public function status(UpdateMarketingStatusRequest $request, MarketingProfile $marketing, UpdateMarketingStatusAction $action): RedirectResponse
@@ -224,5 +228,18 @@ class MarketingController extends Controller
         $action->execute($marketing->load('user'), (string) $request->validated('password'));
 
         return back()->with('flash_message', 'Password marketing berhasil diperbarui.');
+    }
+
+    private function attachDisplayIdentity(MarketingProfile $profile): void
+    {
+        if ($profile->user || ! $profile->display_name) {
+            return;
+        }
+
+        $profile->setRelation('user', new User([
+            'name' => $profile->display_name,
+            'username' => 'Tidak tersedia',
+            'is_active' => false,
+        ]));
     }
 }

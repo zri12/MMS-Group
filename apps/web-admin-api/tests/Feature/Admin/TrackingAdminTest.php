@@ -43,7 +43,7 @@ class TrackingAdminTest extends TestCase
         $this->actingAs($admin)
             ->get('/admin/tracking?date=2026-07-20&status=Aktif')
             ->assertOk()
-            ->assertSee('Tracking Lokasi')
+            ->assertSee('Tracking PDL')
             ->assertSee('data-tracking-map', false)
             ->assertSee('M01 - Marketing M01')
             ->assertSee('Detail Tracking');
@@ -107,6 +107,37 @@ class TrackingAdminTest extends TestCase
             ->assertJsonPath('data.markers.0.status', 'Aktif')
             ->assertJsonPath('data.markers.0.lat', -6.9388)
             ->assertJsonPath('data.markers.0.lng', 107.7079);
+    }
+
+    public function test_admin_can_view_tracking_for_demo_pdl_without_login_account(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $profile = MarketingProfile::factory()->create([
+            'user_id' => null,
+            'display_name' => 'Siti Rahma',
+            'code' => 'PDL01',
+        ]);
+        $session = TrackingSession::factory()->active()->create([
+            'marketing_profile_id' => $profile->id,
+            'session_date' => '2026-07-20',
+            'day_name' => DayName::Monday->value,
+            'status' => TrackingStatus::Active->value,
+        ]);
+        TrackingPoint::factory()->create([
+            'tracking_session_id' => $session->id,
+            'latitude' => -6.9388,
+            'longitude' => 107.7079,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/tracking?date=2026-07-20&status=Aktif')
+            ->assertOk()
+            ->assertSee('PDL01 - Siti Rahma');
+
+        $this->actingAs($admin)
+            ->get(route('admin.tracking.show', $session))
+            ->assertOk()
+            ->assertSee('Siti Rahma');
     }
 
     public function test_tracking_ui_uses_feed_polling_without_full_page_reload(): void

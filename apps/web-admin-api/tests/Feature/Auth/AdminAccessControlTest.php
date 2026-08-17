@@ -84,7 +84,7 @@ class AdminAccessControlTest extends TestCase
         $response = $this->actingAs($admin)->get('/admin');
 
         $response->assertOk();
-        $response->assertSee('Selamat bekerja, Admin MMS');
+        $response->assertSee('Dashboard Admin');
         $response->assertSee('admin.mms');
     }
 
