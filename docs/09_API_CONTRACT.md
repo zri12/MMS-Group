@@ -138,6 +138,9 @@ Middleware:
 
 Menghapus token saat ini. Token perangkat lain tidak dihapus.
 
+Tidak ada endpoint ubah password untuk marketing pada `/api/v1`. Jika password
+perlu diganti, marketing menghubungi admin agar reset dilakukan dari web admin.
+
 Jika akun yang sedang memakai token menjadi inactive, request protected mengembalikan 403 generik dan current token dicabut. Token perangkat lain tidak ikut dicabut.
 
 # 2. Jadwal

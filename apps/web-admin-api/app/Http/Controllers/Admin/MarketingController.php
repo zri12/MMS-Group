@@ -166,7 +166,7 @@ class MarketingController extends Controller
                 'tracking' => 'Tracking',
                 'prospects' => 'Prospek',
                 'members' => 'Anggota',
-                'operational' => 'Setoran',
+                'operational' => 'Laporan Operasional',
                 'visits' => 'Kunjungan',
                 'journeys' => 'Riwayat',
             ],

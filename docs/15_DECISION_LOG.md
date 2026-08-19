@@ -190,3 +190,17 @@ source_of_truth: true
 - Alasan: menerapkan revisi customer yang diterima pada 2026-08-15 tanpa
   menduplikasi data atau membuat modul keuangan baru.
 - Tanggal: 2026-08-15.
+
+# DEC-022 - Customer Revision for Setoran, Password, and Dashboard Shortcuts
+
+- Status: Accepted
+- Keputusan:
+  - Setoran dipertahankan sebagai nilai `storting` di Laporan Operasional;
+    tidak ada modul, resource, atau endpoint marketing Setoran terpisah.
+  - Aplikasi marketing tidak menyediakan ubah password. Marketing menghubungi
+    admin untuk reset password dari web admin.
+  - Shortcut dashboard hanya merujuk modul aktif. Laporan Tunai, Rekap Target,
+    dan Ubah Password tidak menjadi shortcut.
+- Alasan: menghindari endpoint dan navigasi tanpa pasangan implementasi sambil
+  mempertahankan data operasional yang sudah menjadi kontrak.
+- Tanggal: 2026-08-19.

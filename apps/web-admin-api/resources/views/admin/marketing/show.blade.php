@@ -189,7 +189,7 @@
             </div>
 
             <div x-show="activeTab === 'operational'" x-cloak>
-                <x-ui.card title="Setoran">
+                <x-ui.card title="Laporan Operasional">
                     <div class="space-y-3">
                         @forelse ($tabData['operational'] as $report)
                             <a href="{{ route('admin.operational-reports.show', $report) }}" class="grid gap-3 rounded-[var(--mms-radius-md)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface-muted)] p-4 sm:grid-cols-4">
@@ -211,7 +211,7 @@
                                 </div>
                             </a>
                         @empty
-                            <x-ui.empty-state title="Belum ada setoran" />
+                            <x-ui.empty-state title="Belum ada laporan operasional" />
                         @endforelse
                     </div>
                 </x-ui.card>

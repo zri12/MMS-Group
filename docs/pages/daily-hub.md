@@ -32,6 +32,10 @@ Pusat navigasi data berdasarkan hari.
 - Pilih hari
 - Buka tiap modul
 
+Shortcut hanya mengarah ke Tracking, Data Prospek, Data Anggota, Laporan
+Operasional, Laporan Kunjungan, dan Rekap Operasional. Laporan Tunai, Rekap
+Target, dan Ubah Password tidak menjadi shortcut.
+
 ## Tampilan mobile
 
 - Shortcut dua kolom

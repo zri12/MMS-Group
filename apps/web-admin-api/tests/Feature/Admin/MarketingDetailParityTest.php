@@ -53,7 +53,7 @@ class MarketingDetailParityTest extends TestCase
             ->assertSee('Tracking')
             ->assertSee('Prospek')
             ->assertSee('Anggota')
-            ->assertSee('Setoran')
+            ->assertSee('Laporan Operasional')
             ->assertSee('Kunjungan')
             ->assertSee('Riwayat')
             ->assertSee('profiles/marketing-01.jpg')
