@@ -59,7 +59,10 @@ source_of_truth: true
 - Total target dari Flutter dikirim eksplisit dan dapat diverifikasi server.
 - Server boleh memvalidasi bahwa nominal tidak negatif.
 - Aturan satu laporan per marketing per tanggal belum dikonfirmasi.
-- Tidak ada bukti transfer, foto anggota, lokasi setoran, atau field Lain-lain pada modul ini.
+- Setiap laporan dapat memiliki paling banyak dua lampiran opsional: satu Foto Pencairan
+  dan satu Foto Bukti Transfer. Keduanya adalah kategori berbeda pada laporan yang sama,
+  bukan modul atau laporan tunai terpisah.
+- Tidak ada foto anggota, lokasi setoran, atau field Lain-lain pada modul ini.
 
 # 6. Laporan kunjungan
 

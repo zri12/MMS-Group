@@ -109,6 +109,7 @@ class DashboardTest extends TestCase
         $response->assertSee('Total Target');
         $response->assertSee('Anggota Masuk');
         $response->assertSee('Anggota Keluar');
+        $response->assertSee('Belum tersedia');
         $response->assertSee('Foto Pencairan');
         $response->assertSee('Foto Bukti Transfer');
         $response->assertSee('PDL');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature\Admin;
 
 use App\Enums\DayName;
+use App\Enums\OperationalAttachmentType;
 use App\Enums\ProspectStatus;
 use App\Enums\VisitResult;
 use App\Models\DailyOperationalReport;
@@ -29,6 +30,18 @@ class ReportAdminTest extends TestCase
             'report_date' => '2026-07-20',
             'day_name' => DayName::Monday->value,
         ]);
+        $report->attachments()->create([
+            'type' => OperationalAttachmentType::Disbursement,
+            'photo_path' => 'operational-report-attachments/disbursement.jpg',
+            'caption' => 'Pencairan anggota',
+            'uploaded_at' => now(),
+        ]);
+        $report->attachments()->create([
+            'type' => OperationalAttachmentType::TransferProof,
+            'photo_path' => 'operational-report-attachments/transfer.jpg',
+            'caption' => 'Transfer setoran',
+            'uploaded_at' => now(),
+        ]);
 
         $this->actingAs($admin)
             ->get('/admin/operational-reports?search=Gedebage&date_from=2026-07-20&date_to=2026-07-20')
@@ -41,7 +54,11 @@ class ReportAdminTest extends TestCase
             ->get(route('admin.operational-reports.show', $report))
             ->assertOk()
             ->assertSee('Detail Laporan Operasional')
-            ->assertSee('Target Sebelumnya');
+            ->assertSee('Target Sebelumnya')
+            ->assertSee('Foto Pencairan')
+            ->assertSee('Pencairan anggota')
+            ->assertSee('Foto Bukti Transfer')
+            ->assertSee('Transfer setoran');
     }
 
     public function test_admin_can_view_visit_report_list_and_detail(): void

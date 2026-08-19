@@ -115,7 +115,9 @@ Sebelum merge/deploy:
 # Laporan Operasional
 
 - Semua field final tersimpan.
-- Tidak ada field Lain-lain/bukti transfer.
+- Tidak ada field Lain-lain, foto anggota, atau lokasi setoran.
+- Lampiran Foto Pencairan dan Foto Bukti Transfer dapat diunggah dan tampil di
+  detail laporan; kategori tidak boleh diduplikasi dalam satu laporan.
 - Nominal tidak negatif.
 - Target orang integer.
 - Filter tanggal/marketing/resort bekerja.

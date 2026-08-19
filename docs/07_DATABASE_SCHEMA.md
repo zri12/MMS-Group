@@ -183,6 +183,23 @@ Catatan relasi: prospek tidak menyimpan `linked_member_id` secara fisik. Anggota
 
 Keputusan apakah satu marketing hanya boleh satu laporan per tanggal masih pending. Jangan buat unique constraint sebelum dikonfirmasi.
 
+## 7A. operational_report_attachments
+
+| Kolom | Tipe | Null | Index | Keterangan |
+|---|---|---:|---|---|
+| id | bigint unsigned | Tidak | PK | |
+| daily_operational_report_id | bigint unsigned | Tidak | FK/index | Laporan operasional pemilik lampiran |
+| type | varchar(30) | Tidak | Index | `disbursement` atau `transfer_proof` |
+| photo_path | varchar(255) | Tidak | | Path relatif pada disk public |
+| caption | varchar(255) | Ya | | |
+| uploaded_at | timestamp | Ya | Index gabungan | |
+| created_at | timestamp | Tidak | | |
+| updated_at | timestamp | Tidak | | |
+
+Foreign key `daily_operational_report_id` memakai cascade delete. Unique
+`(daily_operational_report_id, type)` memastikan satu laporan paling banyak
+memiliki satu foto untuk masing-masing kategori.
+
 # 8. visit_reports
 
 | Kolom | Tipe | Null | Index |
@@ -315,6 +332,8 @@ Gunakan tabel standar Laravel Sanctum.
 - TrackingSession 1–N TrackingPoints
 - OperationalRecap 1–N OperationalRecapRows
 - MarketingProfile 1–N OperationalRecapRows
+
+- DailyOperationalReport memiliki banyak OperationalReportAttachments
 
 # Delete policy
 

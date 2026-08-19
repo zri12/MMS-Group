@@ -37,6 +37,7 @@ php artisan storage:link
 marketing-profiles/{marketing_id}/profile-{uuid}.webp
 members/{member_id}/member-{uuid}.webp
 visit-reports/{visit_report_id}/visit-{uuid}.webp
+operational-report-attachments/{uuid}.webp
 ```
 
 # Ketentuan foto
@@ -64,6 +65,13 @@ visit-reports/{visit_report_id}/visit-{uuid}.webp
 - maksimal 2 MB
 - caption optional
 - dapat diperbesar di web admin
+
+## Lampiran laporan operasional
+
+- Foto Pencairan dan Foto Bukti Transfer adalah kategori lampiran yang terpisah.
+- Masing-masing kategori hanya dapat diisi satu kali pada satu laporan operasional.
+- jpg, jpeg, png, webp; maksimal 2 MB.
+- caption optional.
 
 # Proses upload
 

@@ -53,9 +53,9 @@ source_of_truth: true
 
 # DEC-008 — Bukti transaksi tidak digunakan
 
-- Status: Accepted
-- Keputusan: tidak ada Bukti Kunjungan lama, Bukti Transaksi, atau foto transfer.
-- Alasan: tidak memiliki pasangan form pada APK yang disetujui.
+- Status: Superseded by DEC-021
+- Keputusan lama: tidak ada Bukti Kunjungan lama, Bukti Transaksi, atau foto transfer.
+- Digantikan oleh: dua kategori lampiran pada Laporan Operasional (lihat DEC-021).
 
 # DEC-009 — Rekap sebagai tabel utuh
 
@@ -174,3 +174,19 @@ source_of_truth: true
 - Alasan: enum `TrackingStatus` belum memiliki nilai `Selesai`. Menambah enum baru tanpa perubahan dokumen bisnis tidak dilakukan pada fase ini.
 - Catatan: stop ulang idempotent dan tidak mengubah nilai final.
 - Tanggal: 2026-07-29.
+
+# DEC-021 - Customer Revision for Prospect, Recap, and Operational Attachments
+
+- Status: Accepted
+- Keputusan:
+  - Prospek/Konsumen dan Anggota memakai daftar, route, API resource, dan tabel
+    yang berbeda; relasi opsional tetap melalui `members.source_prospect_id`.
+  - Laporan Tunai dan Rekap Target tidak dibuat sebagai fitur atau endpoint
+    marketing. Target tetap berada pada Laporan Operasional milik marketing;
+    Rekap Operasional tetap merupakan halaman web admin.
+  - Foto Pencairan dan Foto Bukti Transfer menjadi dua kategori lampiran opsional
+    pada Laporan Operasional. Satu kategori hanya boleh ada satu kali pada satu
+    laporan.
+- Alasan: menerapkan revisi customer yang diterima pada 2026-08-15 tanpa
+  menduplikasi data atau membuat modul keuangan baru.
+- Tanggal: 2026-08-15.

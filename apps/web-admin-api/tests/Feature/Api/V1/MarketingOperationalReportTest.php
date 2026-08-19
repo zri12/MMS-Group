@@ -97,6 +97,24 @@ class MarketingOperationalReportTest extends TestCase
         $this->assertDatabaseHas('operational_report_attachments', ['type' => 'transfer_proof', 'caption' => 'Transfer']);
     }
 
+    public function test_marketing_cannot_upload_the_same_operational_attachment_type_twice(): void
+    {
+        Storage::fake('public');
+        [, $token] = $this->marketingToken('M01');
+
+        $response = $this->withToken($token)->post('/api/v1/operational-reports', $this->payload([
+            'attachments' => [
+                ['type' => 'disbursement', 'photo' => UploadedFile::fake()->image('first.jpg')],
+                ['type' => 'disbursement', 'photo' => UploadedFile::fake()->image('second.jpg')],
+            ],
+        ]));
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['attachments.0.type', 'attachments.1.type']);
+        $this->assertDatabaseCount('daily_operational_reports', 0);
+        $this->assertDatabaseCount('operational_report_attachments', 0);
+    }
+
     public function test_operational_report_validation_rejects_negative_amount_without_accept_header(): void
     {
         [, $token] = $this->marketingToken('M01');

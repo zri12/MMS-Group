@@ -44,6 +44,9 @@ source_of_truth: true
 - `MarketingOperationalReportTest`
 - `MarketingVisitReportTest`
 
-## Non-Scope
+## Scope boundary
 
-Tidak ada bukti transfer, laporan tunai terpisah, atau foto pencairan.
+- Tidak ada Laporan Tunai atau Rekap Target sebagai endpoint marketing terpisah.
+- Target tetap dikirim bersama Laporan Operasional milik marketing.
+- Foto Pencairan dan Foto Bukti Transfer adalah lampiran berkategori pada Laporan
+  Operasional, bukan fitur terpisah.

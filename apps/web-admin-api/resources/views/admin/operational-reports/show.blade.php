@@ -58,5 +58,24 @@
                 <x-data.description-item label="Target Keluar">{{ $rupiah($report->outgoing_target_amount) }} / {{ $report->outgoing_target_people }} org</x-data.description-item>
             </x-data.description-list>
         </x-ui.card>
+
+        <section aria-labelledby="attachment-heading">
+            <h2 id="attachment-heading" class="mb-3 text-[17px] font-semibold text-[var(--mms-color-text)]">Dokumen Operasional</h2>
+            <div class="grid gap-4 sm:grid-cols-2">
+                @foreach ($attachmentPanels as $panel)
+                    <article class="overflow-hidden rounded-[var(--mms-radius-lg)] border border-[var(--mms-color-border)] bg-[var(--mms-color-surface)]">
+                        <div class="border-b border-[var(--mms-color-border)] px-4 py-3">
+                            <h3 class="text-[14px] font-semibold text-[var(--mms-color-text)]">{{ $panel['label'] }}</h3>
+                        </div>
+                        @if ($panel['url'])
+                            <img src="{{ $panel['url'] }}" alt="{{ $panel['label'] }}" class="aspect-[4/3] w-full object-cover" loading="lazy">
+                            <p class="px-4 py-3 text-[13px] text-[var(--mms-color-text-subtle)]">{{ $panel['caption'] ?: 'Tanpa keterangan' }}</p>
+                        @else
+                            <p class="p-4 text-[13px] text-[var(--mms-color-text-subtle)]">Belum ada {{ strtolower($panel['label']) }}.</p>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
+        </section>
     </div>
 @endsection

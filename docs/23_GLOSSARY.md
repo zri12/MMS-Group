@@ -18,12 +18,20 @@ Petugas lapangan pengguna aplikasi Flutter.
 
 **Prospek/Konsumen**  
 Calon anggota atau konsumen yang dicatat marketing dan belum menjadi anggota.
+Prospek tampil pada daftar terpisah dari Data Anggota.
 
 **Anggota**  
 Data anggota/pengajuan yang memiliki nomor anggota dan data pinjaman.
 
 **Laporan Operasional Harian / Input Setoran**  
-Laporan nominal operasional marketing: storting, asuransi, drop, tabungan keluar, target, dan rincian drop.
+Laporan nominal operasional marketing: storting, asuransi, drop, tabungan keluar,
+target, dan rincian drop. Laporan ini dapat memiliki lampiran Foto Pencairan dan
+Foto Bukti Transfer.
+
+**Foto Pencairan / Foto Bukti Transfer**
+
+Dua kategori lampiran yang berbeda pada satu Laporan Operasional Harian. Keduanya
+bukan menu, laporan tunai, atau endpoint marketing yang berdiri sendiri.
 
 **Laporan Kunjungan**  
 Laporan aktivitas kunjungan kepada prospek, berisi tujuan, hasil, status, foto, dan lokasi.
