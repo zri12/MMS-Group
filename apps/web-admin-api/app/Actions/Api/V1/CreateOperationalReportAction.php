@@ -55,8 +55,6 @@ class CreateOperationalReportAction
                 'outgoing_target_people' => $data['outgoing_target_people'],
                 'total_target_amount' => $data['total_target_amount'],
                 'total_target_people' => $data['total_target_people'],
-                'incoming_member_count' => $data['incoming_member_count'] ?? 0,
-                'outgoing_member_count' => $data['outgoing_member_count'] ?? 0,
                 'new_drop' => $data['new_drop'],
                 'continued_drop' => $data['continued_drop'],
                 'notes' => $data['notes'] ?? null,

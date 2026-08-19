@@ -123,10 +123,8 @@ Satu project Flutter menangani:
 
 Modul berikut tidak termasuk scope aktif:
 
-- Bukti Kunjungan versi lama yang berisi foto anggota dan bukti transfer;
+- Bukti Kunjungan versi lama yang berisi foto anggota;
 - Bukti Transaksi;
-- upload bukti transfer;
-- Foto Pencairan;
 - Laporan Tunai terpisah;
 - payment gateway;
 - payroll;
@@ -136,6 +134,9 @@ Modul berikut tidak termasuk scope aktif:
 - WebSocket realtime pada versi awal;
 - grafik dekoratif yang tidak diperlukan;
 - export Excel/PDF otomatis kecuali disetujui kemudian.
+
+Foto Pencairan dan Foto Bukti Transfer bukan modul atau laporan terpisah. Keduanya
+merupakan lampiran opsional dengan kategori berbeda pada Laporan Operasional Harian.
 
 # 7. Prinsip konsistensi web dan Flutter
 

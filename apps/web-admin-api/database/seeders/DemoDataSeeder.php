@@ -64,7 +64,6 @@ class DemoDataSeeder extends Seeder
                     'withdrawal_saving' => 100_000, 'previous_target_amount' => 5_000_000, 'previous_target_people' => 2,
                     'incoming_target_amount' => $incoming[$index], 'incoming_target_people' => 3, 'outgoing_target_amount' => $outgoing[$index],
                     'outgoing_target_people' => 1, 'total_target_amount' => $incoming[$index] + $outgoing[$index], 'total_target_people' => 4,
-                    'incoming_member_count' => $offset === 0 ? 3 : 0, 'outgoing_member_count' => $offset === 0 && $index === 0 ? 2 : ($offset === 0 && $index < 6 ? 1 : 0),
                     'new_drop' => 2_000_000, 'continued_drop' => $drop[$index] - 2_000_000, 'notes' => 'Data demo PDL.', 'sync_status' => SyncStatus::Synced,
                 ]);
 

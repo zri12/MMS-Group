@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\DayName;
+use App\Enums\OperationalAttachmentType;
 use App\Enums\SyncStatus;
 use App\Http\Controllers\Controller;
 use App\Models\DailyOperationalReport;
 use App\Models\MarketingProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class OperationalReportController extends Controller
@@ -61,10 +63,26 @@ class OperationalReportController extends Controller
 
     public function show(DailyOperationalReport $operationalReport): View
     {
-        $operationalReport->load('marketingProfile.user');
+        $operationalReport->load(['marketingProfile.user', 'attachments']);
+
+        $attachmentsByType = $operationalReport->attachments->keyBy(
+            fn ($attachment): string => $attachment->type->value,
+        );
+        $attachmentPanels = [];
+
+        foreach (OperationalAttachmentType::cases() as $type) {
+            $attachment = $attachmentsByType->get($type->value);
+
+            $attachmentPanels[$type->value] = [
+                'label' => $type->label(),
+                'url' => $attachment ? Storage::url($attachment->photo_path) : null,
+                'caption' => $attachment?->caption,
+            ];
+        }
 
         return view('admin.operational-reports.show', [
             'report' => $operationalReport,
+            'attachmentPanels' => $attachmentPanels,
         ]);
     }
 }

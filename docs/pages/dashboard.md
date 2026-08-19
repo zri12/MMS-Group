@@ -19,43 +19,42 @@ Memberikan ringkasan operasional dan akses cepat.
 
 ## Data yang ditampilkan
 
-- Total Anggota
+- Drop
+- Storting
+- Sirkulasi
+- Target Masuk
+- Target Keluar
 - Total Target
-- Total Drop
-- Total Storting
-- Selected day
-- Prospek Baru
-- Kunjungan Hari Ini
-- Menunggu Sinkronisasi
-- Status Marketing
-- Rekap ringkas
+- Anggota Masuk
+- Anggota Keluar
+- Total Anggota
+- Foto Pencairan
+- Foto Bukti Transfer
+- Kartu PDL
 
 ## Interaksi
 
-- Pilih hari
-- Buka Tracking
-- Buka Data Anggota
+- Buka detail PDL
+- Buka Tracking PDL
 - Buka Laporan Operasional
-- Buka Rekap
-- Buka Prospek/Kunjungan
 
 ## Tampilan mobile
 
-- Empat summary card dua kolom
-- Hari dua kolom
-- Status marketing horizontal carousel
+- Metrik bertumpuk agar label dan nilai tetap terbaca
+- Panel foto dua kategori
 
 ## Tampilan desktop
 
-- Empat summary card sejajar
-- Sidebar
-- Rekap ringkas
+- Metrik tiga kolom
+- Panel foto dua kategori
+- Kartu PDL dan aksi Tracking PDL
 
 ## Aturan bisnis
 
-- Data harian mengikuti day query
-- Empat total utama tetap
-- Tidak ada Foto Bukti Transfer
+- Data metrik mengikuti tanggal dan hari terpilih.
+- Anggota Masuk dan Anggota Keluar menampilkan `Belum tersedia` bila data
+  operasional belum mengirim nilainya; tidak ada rumus turunan.
+- Laporan Tunai tidak ditampilkan di dashboard.
 
 ## State wajib
 
@@ -67,8 +66,9 @@ Memberikan ringkasan operasional dan akses cepat.
 
 ## Jangan diubah
 
-- Jangan menambah kartu utama tanpa persetujuan
-- Jangan hardcode total di komponen web
+- Jangan menambah kartu utama tanpa persetujuan.
+- Jangan hardcode total di komponen web.
+- Jangan membuat panel foto sebagai modul atau route mandiri.
 
 ## Acceptance criteria
 

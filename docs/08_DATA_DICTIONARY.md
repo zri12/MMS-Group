@@ -128,10 +128,16 @@ Status awal selalu `Menunggu`.
 | Drop Baru | `new_drop` | `new_drop` | integer | Ya |
 | Drop Lanjut | `continued_drop` | `continued_drop` | integer | Ya |
 | Catatan | `notes` | `notes` | string/null | Tidak |
+| Lampiran Operasional | `attachments` | relasi `operational_report_attachments` | array | Tidak | Maksimum dua lampiran dengan kategori berbeda |
+| Jenis Lampiran | `attachments[].type` | `operational_report_attachments.type` | `disbursement`/`transfer_proof` | Ya bila ada lampiran | Satu Foto Pencairan dan/atau satu Foto Bukti Transfer |
+| Foto Lampiran | `attachments[].photo` | `operational_report_attachments.photo_path` | file/string | Ya bila ada lampiran | Upload multipart, URL tersedia pada response |
+| Keterangan Lampiran | `attachments[].caption` | `operational_report_attachments.caption` | string/null | Tidak | |
 | Marketing | response `marketing` | `marketing_profile_id` | relation | Ya |
 | Sinkronisasi | `sync_status` | `sync_status` | SyncStatus | Ya |
 
-Tidak ada field Lain-lain, foto anggota, bukti transfer, atau lokasi setoran.
+Tidak ada field Lain-lain, foto anggota, atau lokasi setoran. Foto Pencairan dan
+Foto Bukti Transfer hanya tersedia sebagai lampiran berkategori pada laporan ini,
+bukan sebagai modul terpisah.
 
 # 6. Laporan Kunjungan
 

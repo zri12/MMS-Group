@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature\Database;
 
 use App\Enums\DayName;
+use App\Models\DailyOperationalReport;
 use App\Models\MarketingProfile;
 use App\Models\MarketingWorkDay;
 use App\Models\Member;
 use App\Models\OperationalRecap;
 use App\Models\OperationalRecapRow;
+use App\Models\OperationalReportAttachment;
 use App\Models\Prospect;
 use App\Models\TrackingPoint;
 use App\Models\TrackingSession;
@@ -120,6 +122,27 @@ class DomainSchemaTest extends TestCase
         $this->assertSame(0, OperationalRecapRow::query()->count());
     }
 
+    public function test_operational_report_attachment_type_is_unique_per_report_and_cascades(): void
+    {
+        $report = DailyOperationalReport::factory()->create();
+
+        OperationalReportAttachment::query()->create([
+            'daily_operational_report_id' => $report->id,
+            'type' => 'disbursement',
+            'photo_path' => 'operational-report-attachments/disbursement.jpg',
+        ]);
+
+        $this->assertDatabaseConstraintViolation(fn () => OperationalReportAttachment::query()->create([
+            'daily_operational_report_id' => $report->id,
+            'type' => 'disbursement',
+            'photo_path' => 'operational-report-attachments/duplicate.jpg',
+        ]));
+
+        $report->delete();
+
+        $this->assertSame(0, OperationalReportAttachment::query()->count());
+    }
+
     public function test_tracking_point_created_at_is_required_and_defaults_to_current_timestamp(): void
     {
         $trackingSession = TrackingSession::factory()->create();
@@ -175,6 +198,7 @@ class DomainSchemaTest extends TestCase
             'members',
             'marketing_schedules',
             'daily_operational_reports',
+            'operational_report_attachments',
             'visit_reports',
             'tracking_sessions',
             'tracking_points',
@@ -200,6 +224,7 @@ class DomainSchemaTest extends TestCase
             'members' => ['id', 'local_uuid', 'marketing_profile_id', 'source_prospect_id', 'member_number', 'loan_number', 'approval_status', 'member_photo_path', 'approved_by', 'rejected_by', 'sync_status', 'deleted_at'],
             'marketing_schedules' => ['id', 'marketing_profile_id', 'prospect_id', 'schedule_date', 'start_time', 'status', 'created_by', 'deleted_at'],
             'daily_operational_reports' => ['id', 'local_uuid', 'marketing_profile_id', 'report_date', 'storting', 'drop_amount', 'total_target_amount', 'sync_status'],
+            'operational_report_attachments' => ['id', 'daily_operational_report_id', 'type', 'photo_path', 'caption', 'uploaded_at'],
             'visit_reports' => ['id', 'local_uuid', 'prospect_id', 'marketing_profile_id', 'visit_date', 'visit_result', 'prospect_status', 'photo_path', 'sync_status'],
             'tracking_sessions' => ['id', 'local_uuid', 'marketing_profile_id', 'schedule_id', 'session_date', 'started_at', 'ended_at', 'status', 'distance_meters', 'visit_count'],
             'tracking_points' => ['id', 'local_uuid', 'tracking_session_id', 'latitude', 'longitude', 'accuracy_meters', 'recorded_at', 'received_at'],

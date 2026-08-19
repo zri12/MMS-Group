@@ -39,8 +39,8 @@
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icons[$card['icon']] }}" /></svg>
                             </span>
                         </div>
-                        <p class="mms-dashboard-metric-value" title="{{ $card['type'] === 'currency' ? $rupiah($card['value']) : $card['value'].' orang' }}">{{ $card['type'] === 'currency' ? $compactCurrency($card['value']) : $card['value'] }}</p>
-                        <p class="mms-dashboard-metric-helper">{{ $card['type'] === 'count' ? 'orang' : 'Akumulasi periode terpilih.' }}</p>
+                        <p class="mms-dashboard-metric-value" title="{{ $card['value'] === null ? 'Belum tersedia' : ($card['type'] === 'currency' ? $rupiah($card['value']) : $card['value'].' orang') }}">{{ $card['value'] === null ? 'Belum tersedia' : ($card['type'] === 'currency' ? $compactCurrency($card['value']) : $card['value']) }}</p>
+                        <p class="mms-dashboard-metric-helper">{{ $card['value'] === null ? 'Menunggu definisi bisnis.' : ($card['type'] === 'count' ? 'orang' : 'Akumulasi periode terpilih.') }}</p>
                     </article>
                 @endforeach
             </div>

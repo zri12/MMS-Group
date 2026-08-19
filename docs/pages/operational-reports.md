@@ -30,6 +30,8 @@ Menampilkan data Input Setoran dari Flutter.
 - Resort
 - Waktu
 - Sinkronisasi
+- Foto Pencairan
+- Foto Bukti Transfer
 
 ## Interaksi
 
@@ -62,7 +64,9 @@ Menampilkan data Input Setoran dari Flutter.
 
 ## Jangan diubah
 
-- Jangan tampilkan foto anggota, bukti transfer, lokasi setoran, Lain-lain
+- Jangan tampilkan foto anggota, lokasi setoran, atau Lain-lain.
+- Foto Pencairan dan Foto Bukti Transfer hanya tampil sebagai dua kategori
+  lampiran pada laporan operasional.
 
 ## Acceptance criteria
 

@@ -7,6 +7,25 @@ last_updated: "2026-07-29"
 source_of_truth: true
 ---
 
+# 2.0.0 - 2026-08-19
+
+## Changed
+
+- Prospek/Konsumen dan Anggota ditegaskan sebagai dua daftar, route, dan resource
+  yang berbeda.
+- Laporan Tunai dan Rekap Target tidak tersedia sebagai endpoint marketing;
+  target tetap dikirim bersama Laporan Operasional, sedangkan Rekap Operasional
+  tetap terbatas pada web admin.
+- Foto Pencairan dan Foto Bukti Transfer menjadi dua kategori lampiran opsional
+  pada Laporan Operasional, bukan modul mandiri.
+- Dashboard mengikuti revisi customer dengan panel dua kategori lampiran.
+
+## Added
+
+- Tabel `operational_report_attachments` dalam spesifikasi data dan database.
+- Aturan unik per `(daily_operational_report_id, type)` untuk mencegah duplikasi
+  kategori lampiran pada satu laporan.
+
 # 1.9.0 - 2026-07-29
 
 ## Added

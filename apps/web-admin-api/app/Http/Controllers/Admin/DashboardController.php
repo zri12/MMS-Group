@@ -37,8 +37,6 @@ class DashboardController extends Controller
             ->selectRaw('COALESCE(SUM(incoming_target_amount), 0) as target_incoming_total')
             ->selectRaw('COALESCE(SUM(outgoing_target_amount), 0) as target_outgoing_total')
             ->selectRaw('COALESCE(SUM(total_target_amount), 0) as target_total')
-            ->selectRaw('COALESCE(SUM(incoming_member_count), 0) as incoming_members')
-            ->selectRaw('COALESCE(SUM(outgoing_member_count), 0) as outgoing_members')
             ->firstOrFail();
 
         $circulationTotal = (int) OperationalRecap::query()
@@ -97,8 +95,8 @@ class DashboardController extends Controller
                 ['label' => 'Target Masuk', 'value' => (int) $reportTotals->target_incoming_total, 'type' => 'currency', 'icon' => 'arrow-in'],
                 ['label' => 'Target Keluar', 'value' => (int) $reportTotals->target_outgoing_total, 'type' => 'currency', 'icon' => 'arrow-out'],
                 ['label' => 'Total Target', 'value' => (int) $reportTotals->target_total, 'type' => 'currency', 'icon' => 'target'],
-                ['label' => 'Anggota Masuk', 'value' => (int) $reportTotals->incoming_members, 'type' => 'count', 'icon' => 'member-in'],
-                ['label' => 'Anggota Keluar', 'value' => (int) $reportTotals->outgoing_members, 'type' => 'count', 'icon' => 'member-out'],
+                ['label' => 'Anggota Masuk', 'value' => null, 'type' => 'count', 'icon' => 'member-in'],
+                ['label' => 'Anggota Keluar', 'value' => null, 'type' => 'count', 'icon' => 'member-out'],
                 ['label' => 'Total Anggota', 'value' => Member::query()->count(), 'type' => 'count', 'icon' => 'members'],
             ],
             'compactCurrency' => fn (int $amount): string => CompactCurrency::format($amount),

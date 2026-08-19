@@ -252,6 +252,18 @@ Query: `date_from`, `date_to`, `page`, `per_page`.
 
 ## POST `/operational-reports`
 
+Request tanpa foto dapat dikirim sebagai JSON. Jika mengirim lampiran, gunakan
+`multipart/form-data` dan tambahkan pasangan field berikut untuk setiap lampiran:
+
+- `attachments[0][type]`: `disbursement` atau `transfer_proof`
+- `attachments[0][photo]`: file jpg, jpeg, png, atau webp
+- `attachments[0][caption]`: opsional
+
+Setiap kategori hanya boleh muncul sekali dalam satu laporan. Tidak ada endpoint
+marketing terpisah untuk Laporan Tunai, Rekap Target, Foto Pencairan, atau Foto
+Bukti Transfer; data target tetap berada di laporan operasional milik marketing,
+sedangkan kedua foto berada pada `attachments` laporan yang sama.
+
 ```json
 {
   "local_uuid": "2464590b-e959-4fb1-bb7d-317a26fc9c9b",

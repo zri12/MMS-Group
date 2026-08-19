@@ -190,3 +190,15 @@ Rumus belum termasuk scope sampai customer mengonfirmasi.
 - Realtime WebSocket
 - AI analytics
 - Integrasi pihak ketiga
+
+# 12. Override revisi customer
+
+Revisi customer yang diterima pada 2026-08-15 menggantikan pernyataan dashboard
+dan laporan operasional yang bertentangan di atas:
+
+- Prospek/Konsumen dan Anggota tetap menjadi daftar, route, dan resource API yang terpisah.
+- Laporan Tunai dan Rekap Target bukan fitur atau endpoint marketing terpisah.
+  Nilai target tetap menjadi field pada laporan operasional milik marketing,
+  sedangkan Rekap Operasional hanya tersedia di web admin.
+- Foto Pencairan dan Foto Bukti Transfer adalah kategori lampiran opsional yang
+  terpisah pada satu laporan operasional, bukan modul mandiri.

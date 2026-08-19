@@ -34,8 +34,6 @@ class DailyOperationalReportResource extends JsonResource
             'outgoing_target_people' => $this->outgoing_target_people,
             'total_target_amount' => $this->total_target_amount,
             'total_target_people' => $this->total_target_people,
-            'incoming_member_count' => $this->incoming_member_count,
-            'outgoing_member_count' => $this->outgoing_member_count,
             'new_drop' => $this->new_drop,
             'continued_drop' => $this->continued_drop,
             'notes' => $this->notes,
