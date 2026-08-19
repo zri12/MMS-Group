@@ -48,5 +48,7 @@ source_of_truth: true
 
 - Tidak ada Laporan Tunai atau Rekap Target sebagai endpoint marketing terpisah.
 - Target tetap dikirim bersama Laporan Operasional milik marketing.
+- Setoran adalah nilai `storting` pada Laporan Operasional, bukan resource atau
+  endpoint marketing mandiri.
 - Foto Pencairan dan Foto Bukti Transfer adalah lampiran berkategori pada Laporan
   Operasional, bukan fitur terpisah.

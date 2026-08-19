@@ -82,6 +82,7 @@ Sebelum merge/deploy:
 - Marketing inactive dan marketing tanpa profile tidak mendapat token.
 - API profile/logout membutuhkan Sanctum token dengan ability `marketing-mobile`.
 - Logout API hanya menghapus token saat ini.
+- Tidak ada endpoint ubah password untuk marketing; reset password dilakukan oleh admin.
 - Protected request dari akun inactive mencabut current token saja.
 
 # Marketing
@@ -115,6 +116,7 @@ Sebelum merge/deploy:
 # Laporan Operasional
 
 - Semua field final tersimpan.
+- Setoran tersimpan sebagai field `storting` pada Laporan Operasional.
 - Tidak ada field Lain-lain, foto anggota, atau lokasi setoran.
 - Lampiran Foto Pencairan dan Foto Bukti Transfer dapat diunggah dan tampil di
   detail laporan; kategori tidak boleh diduplikasi dalam satu laporan.

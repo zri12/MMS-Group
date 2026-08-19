@@ -7,6 +7,20 @@ last_updated: "2026-07-29"
 source_of_truth: true
 ---
 
+# 2.1.0 - 2026-08-19
+
+## Changed
+
+- Label Setoran pada detail PDL diselaraskan menjadi Laporan Operasional;
+  nilai setoran tetap menggunakan field `storting`.
+- Shortcut Rencana Kerja dibatasi pada modul aktif dan tidak memuat Laporan
+  Tunai, Rekap Target, atau Ubah Password.
+
+## Security
+
+- Kontrak marketing menegaskan bahwa tidak ada endpoint ubah password; reset
+  password hanya dapat dilakukan admin melalui web admin.
+
 # 2.0.0 - 2026-08-19
 
 ## Changed

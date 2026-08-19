@@ -202,3 +202,10 @@ dan laporan operasional yang bertentangan di atas:
   sedangkan Rekap Operasional hanya tersedia di web admin.
 - Foto Pencairan dan Foto Bukti Transfer adalah kategori lampiran opsional yang
   terpisah pada satu laporan operasional, bukan modul mandiri.
+- Setoran bukan modul terpisah. Nilai setoran tersimpan sebagai `storting` pada
+  Laporan Operasional, dan detail PDL menautkan ke laporan tersebut.
+- Aplikasi marketing tidak memiliki fitur ubah password. Reset password hanya
+  dilakukan admin melalui web admin.
+- Shortcut dashboard hanya mengarah ke Tracking, Data Prospek, Data Anggota,
+  Laporan Operasional, Laporan Kunjungan, dan Rekap Operasional web admin.
+  Laporan Tunai, Rekap Target, dan Ubah Password bukan shortcut dashboard.

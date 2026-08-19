@@ -119,6 +119,10 @@ Satu project Flutter menangani:
 17. Status Sinkronisasi
 18. Logout
 
+Aplikasi marketing tidak memiliki modul atau endpoint ubah password. Marketing
+yang memerlukan penggantian password harus menghubungi admin; reset password
+dilakukan melalui web admin.
+
 # 6. Modul yang tidak digunakan
 
 Modul berikut tidak termasuk scope aktif:

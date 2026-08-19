@@ -17,7 +17,7 @@ Fase ini hanya mencakup:
 - profile marketing terautentikasi;
 - logout token saat ini.
 
-Fase ini tidak mencakup registrasi, refresh token, logout semua perangkat, daftar token perangkat, REST API bisnis, upload file, offline sync runtime, Flutter, atau deployment.
+Fase ini tidak mencakup registrasi, ubah password marketing, refresh token, logout semua perangkat, daftar token perangkat, REST API bisnis, upload file, offline sync runtime, Flutter, atau deployment.
 
 # Syarat Login
 
@@ -102,6 +102,9 @@ abilities:marketing-mobile
 | POST | `/api/v1/auth/login` | `api.v1.auth.login` | public |
 | GET | `/api/v1/auth/profile` | `api.v1.auth.profile` | `auth:sanctum`, `active`, `marketing`, `abilities:marketing-mobile` |
 | POST | `/api/v1/auth/logout` | `api.v1.auth.logout` | `auth:sanctum`, `active`, `marketing`, `abilities:marketing-mobile` |
+
+Tidak ada route ubah password marketing. Reset password merupakan tindakan admin
+pada web admin dan tidak dapat dilakukan menggunakan token marketing.
 
 # Response Login
 

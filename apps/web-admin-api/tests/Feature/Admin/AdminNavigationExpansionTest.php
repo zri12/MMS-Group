@@ -62,7 +62,15 @@ class AdminNavigationExpansionTest extends TestCase
         $this->actingAs($admin)->get('/admin/daily?date=2026-07-20&day=Senin')
             ->assertOk()
             ->assertSee('Rencana Kerja')
-            ->assertSee('Laporan Operasional');
+            ->assertSee('Tracking Lokasi')
+            ->assertSee('Data Anggota')
+            ->assertSee('Laporan Operasional')
+            ->assertSee('Rekap Operasional')
+            ->assertSee('Data Prospek')
+            ->assertSee('Laporan Kunjungan')
+            ->assertDontSee('Laporan Tunai')
+            ->assertDontSee('Rekap Target')
+            ->assertDontSee('Ubah Password');
 
         $this->actingAs($admin)->get('/admin/schedules')
             ->assertOk()

@@ -46,6 +46,11 @@ class RouteContractTest extends TestCase
             'verification.notice',
             'api.v1.auth.refresh',
             'api.v1.auth.logout-all',
+            'api.v1.auth.password.update',
+            'api.v1.deposits.index',
+            'api.v1.cash-recaps.index',
+            'api.v1.target-recaps.index',
+            'api.v1.operational-recaps.index',
         ];
 
         foreach ($forbidden as $name) {
