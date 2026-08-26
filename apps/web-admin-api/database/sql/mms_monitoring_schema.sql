@@ -1,4 +1,4 @@
-﻿
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -66,7 +66,7 @@ CREATE TABLE `daily_operational_reports` (
   KEY `idx_reports_resort` (`resort`),
   KEY `idx_reports_sync_status` (`sync_status`),
   CONSTRAINT `daily_operational_reports_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `failed_jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -120,7 +120,8 @@ DROP TABLE IF EXISTS `marketing_profiles`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `marketing_profiles` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `display_name` varchar(150) DEFAULT NULL,
   `code` varchar(10) NOT NULL,
   `phone` varchar(30) DEFAULT NULL,
   `area` varchar(100) NOT NULL,
@@ -128,12 +129,12 @@ CREATE TABLE `marketing_profiles` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `marketing_profiles_user_id_unique` (`user_id`),
   UNIQUE KEY `marketing_profiles_code_unique` (`code`),
+  UNIQUE KEY `marketing_profiles_user_id_unique` (`user_id`),
   KEY `idx_marketing_profiles_phone` (`phone`),
   KEY `idx_marketing_profiles_area` (`area`),
-  CONSTRAINT `marketing_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  CONSTRAINT `marketing_profiles_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `marketing_schedules`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -168,7 +169,7 @@ CREATE TABLE `marketing_schedules` (
   CONSTRAINT `marketing_schedules_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
   CONSTRAINT `marketing_schedules_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`),
   CONSTRAINT `marketing_schedules_prospect_id_foreign` FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `marketing_work_days`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -183,7 +184,7 @@ CREATE TABLE `marketing_work_days` (
   UNIQUE KEY `uq_work_days_marketing_day` (`marketing_profile_id`,`day_name`),
   KEY `idx_work_days_day` (`day_name`),
   CONSTRAINT `marketing_work_days_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `members`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -237,7 +238,7 @@ CREATE TABLE `members` (
   CONSTRAINT `members_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`),
   CONSTRAINT `members_rejected_by_foreign` FOREIGN KEY (`rejected_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `members_source_prospect_id_foreign` FOREIGN KEY (`source_prospect_id`) REFERENCES `prospects` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `migrations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -247,7 +248,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `operational_recap_rows`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -283,7 +284,7 @@ CREATE TABLE `operational_recap_rows` (
   KEY `idx_recap_rows_marketing` (`marketing_profile_id`),
   CONSTRAINT `operational_recap_rows_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`),
   CONSTRAINT `operational_recap_rows_operational_recap_id_foreign` FOREIGN KEY (`operational_recap_id`) REFERENCES `operational_recaps` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `operational_recaps`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -304,7 +305,25 @@ CREATE TABLE `operational_recaps` (
   KEY `idx_operational_recaps_day` (`day_name`),
   KEY `idx_operational_recaps_status` (`status`),
   CONSTRAINT `operational_recaps_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `operational_report_attachments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `operational_report_attachments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `daily_operational_report_id` bigint(20) unsigned NOT NULL,
+  `type` varchar(30) NOT NULL,
+  `photo_path` varchar(255) NOT NULL,
+  `caption` varchar(255) DEFAULT NULL,
+  `uploaded_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `op_attachment_report_type_unique` (`daily_operational_report_id`,`type`),
+  KEY `idx_operational_attachments_type_uploaded` (`type`,`uploaded_at`),
+  CONSTRAINT `fk_op_attachment_report` FOREIGN KEY (`daily_operational_report_id`) REFERENCES `daily_operational_reports` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -334,7 +353,7 @@ CREATE TABLE `personal_access_tokens` (
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`),
   KEY `personal_access_tokens_expires_at_index` (`expires_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=84 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `prospects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -369,7 +388,7 @@ CREATE TABLE `prospects` (
   KEY `idx_prospects_name` (`name`),
   KEY `idx_prospects_phone` (`phone`),
   CONSTRAINT `prospects_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -410,7 +429,7 @@ CREATE TABLE `tracking_points` (
   KEY `idx_tracking_points_type` (`point_type`),
   KEY `idx_tracking_points_recorded` (`recorded_at`),
   CONSTRAINT `tracking_points_tracking_session_id_foreign` FOREIGN KEY (`tracking_session_id`) REFERENCES `tracking_sessions` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `tracking_sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -439,7 +458,7 @@ CREATE TABLE `tracking_sessions` (
   KEY `idx_tracking_sessions_status` (`status`),
   CONSTRAINT `tracking_sessions_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`),
   CONSTRAINT `tracking_sessions_schedule_id_foreign` FOREIGN KEY (`schedule_id`) REFERENCES `marketing_schedules` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -463,7 +482,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `idx_users_role` (`role`),
   KEY `idx_users_active` (`is_active`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=226 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `visit_reports`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -501,7 +520,7 @@ CREATE TABLE `visit_reports` (
   KEY `idx_visit_reports_sync_status` (`sync_status`),
   CONSTRAINT `visit_reports_marketing_profile_id_foreign` FOREIGN KEY (`marketing_profile_id`) REFERENCES `marketing_profiles` (`id`),
   CONSTRAINT `visit_reports_prospect_id_foreign` FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -512,34 +531,4 @@ CREATE TABLE `visit_reports` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Customer web-admin revision, 2026-08-15.
--- This schema export contains no user records, password hashes, tokens, or credentials.
-ALTER TABLE `marketing_profiles`
-  DROP FOREIGN KEY `marketing_profiles_user_id_foreign`;
-ALTER TABLE `marketing_profiles`
-  MODIFY `user_id` bigint unsigned NULL;
-ALTER TABLE `marketing_profiles`
-  ADD CONSTRAINT `marketing_profiles_user_id_foreign`
-    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
-
-CREATE TABLE `operational_report_attachments` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `daily_operational_report_id` bigint unsigned NOT NULL,
-  `type` varchar(30) NOT NULL,
-  `photo_path` varchar(255) NOT NULL,
-  `caption` varchar(255) DEFAULT NULL,
-  `uploaded_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_operational_attachments_type_uploaded` (`type`,`uploaded_at`),
-  KEY `fk_op_attachment_report` (`daily_operational_report_id`),
-  CONSTRAINT `fk_op_attachment_report` FOREIGN KEY (`daily_operational_report_id`) REFERENCES `daily_operational_reports` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE `marketing_profiles` ADD `display_name` varchar(150) NULL AFTER `user_id`;
-ALTER TABLE `daily_operational_reports` ADD `incoming_member_count` smallint unsigned NOT NULL DEFAULT 0 AFTER `total_target_people`;
-ALTER TABLE `daily_operational_reports` ADD `outgoing_member_count` smallint unsigned NOT NULL DEFAULT 0 AFTER `incoming_member_count`;
-
 

@@ -1,54 +1,47 @@
-# MMS MySQL SQL Files
+# MMS Database SQL
 
-Folder ini berisi artefak SQL untuk local development MMS.
+Dump ini dibuat dari database `mms_monitoring` setelah seluruh 20 migration
+Laravel diterapkan dan seeder development resmi dijalankan.
 
 ## File
 
-- `mms_monitoring_schema.sql`: schema-only. Berisi struktur tabel, index, dan foreign key tanpa data.
-- `mms_monitoring_development_data.sql`: data development-only. Berisi INSERT data development tanpa CREATE TABLE.
-- `mms_monitoring_development_full.sql`: gabungan schema dan data development untuk restore lokal.
-- `mms_monitoring_reset_data_admin_only.sql`: hapus data pada tabel existing dan buat satu akun admin saja.
-- `mms_monitoring_fresh_admin_only.sql`: schema lengkap untuk database kosong dengan satu akun admin saja.
+- `mms_monitoring_schema.sql`: struktur tabel, index, foreign key, serta tabel
+  `migrations` tanpa data simulasi.
+- `mms_monitoring_development_data.sql`: data simulasi lengkap untuk schema
+  yang sudah tersedia.
+- `mms_monitoring_development_full.sql`: schema dan data simulasi lengkap
+  dalam satu file untuk database MySQL kosong.
 
-## Peringatan
+Dataset mencakup akun admin dan marketing, profil/wilayah kerja, hari kerja,
+prospek, anggota dengan setiap status, jadwal, laporan operasional dan
+lampirannya, laporan kunjungan, sesi tracking/titik lokasi, serta rekap
+operasional.
 
-- Hanya untuk local development.
-- Jangan digunakan pada production tanpa review ulang.
-- Full development SQL berisi password hash development. Reset password sebelum deployment.
-- Runtime token, session, cache, dan job data tidak disertakan.
-- File dihasilkan dari database local yang sudah dimigrate dan diseed.
-- Migration dan seeder Laravel tetap menjadi sumber implementasi utama. SQL dump hanya artefak distribusi dan restore development.
+## Import Lokal
 
-## Import
-
-Schema lalu data:
+Pilih salah satu cara berikut pada database development kosong.
 
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u root -p nama_database < database/sql/mms_monitoring_schema.sql
-mysql -h 127.0.0.1 -P 3306 -u root -p nama_database < database/sql/mms_monitoring_development_data.sql
+# Schema dan data terpisah
+mysql -h 127.0.0.1 -P 3306 -u root nama_database < database/sql/mms_monitoring_schema.sql
+mysql -h 127.0.0.1 -P 3306 -u root nama_database < database/sql/mms_monitoring_development_data.sql
+
+# Atau satu file lengkap
+mysql -h 127.0.0.1 -P 3306 -u root nama_database < database/sql/mms_monitoring_development_full.sql
 ```
 
-Full development:
+Untuk menghasilkan ulang data melalui Laravel pada environment lokal:
 
 ```bash
-mysql -h 127.0.0.1 -P 3306 -u root -p nama_database < database/sql/mms_monitoring_development_full.sql
+MMS_SEED_DEFAULT_PASSWORD=ubah-password-demo php artisan db:seed --force
+php artisan db:seed --class=Database\\Seeders\\DemoDataSeeder --force
 ```
 
-Admin-only untuk database kosong:
+## Penting
 
-```bash
-mysql -h 127.0.0.1 -P 3306 -u root -p nama_database < database/sql/mms_monitoring_fresh_admin_only.sql
-```
-
-Admin-only untuk database yang tabelnya sudah ada:
-
-```bash
-mysql -h 127.0.0.1 -P 3306 -u root -p nama_database < database/sql/mms_monitoring_reset_data_admin_only.sql
-```
-
-Cara Laravel yang direkomendasikan:
-
-```bash
-php artisan migrate
-php artisan db:seed
-```
+- SQL ini hanya untuk localhost/development dan tidak boleh diimpor ke database
+  production yang berisi data nyata.
+- Dump mencatat 20 migration sebagai sudah dijalankan. Setelah import tidak
+  perlu menjalankan `php artisan migrate` lagi kecuali ada migration baru.
+- Password akun data simulasi harus diganti sebelum penggunaan selain demo.
+- Token login, session, cache, job, dan file foto fisik tidak disertakan.
