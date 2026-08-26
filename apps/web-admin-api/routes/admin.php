@@ -47,6 +47,7 @@ Route::prefix('admin')
         Route::resource('operational-reports', OperationalReportController::class)->only(['index', 'show']);
         Route::resource('visit-reports', VisitReportController::class)->only(['index', 'show']);
         Route::resource('schedules', ScheduleController::class)->except(['show']);
+        Route::post('operational-recaps/generate', [OperationalRecapController::class, 'generate'])->name('operational-recaps.generate');
         Route::resource('operational-recaps', OperationalRecapController::class)->only(['index', 'show']);
         Route::get('tracking/feed', [TrackingController::class, 'feed'])->name('tracking.feed');
         Route::resource('tracking', TrackingController::class)

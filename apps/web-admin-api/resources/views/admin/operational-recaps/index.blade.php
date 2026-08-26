@@ -7,7 +7,7 @@
     <div class="space-y-6">
         <x-navigation.page-header
             title="{{ config('mms.navigation.labels.operational_recaps') }}"
-            description="Daftar rekap operasional dari tabel rekap yang tersimpan."
+            description="Rekap seluruh PDL berdasarkan laporan operasional pada tanggal terpilih."
             :breadcrumbs="[['label' => 'Admin', 'href' => route('admin.home')], ['label' => config('mms.navigation.labels.operational_recaps')]]"
         />
 
@@ -18,6 +18,14 @@
                 <div class="flex items-end gap-2"><x-ui.button type="submit" full-width="true">Terapkan</x-ui.button><x-ui.link-button :href="route('admin.operational-recaps.index')" variant="outline">Reset</x-ui.link-button></div>
             </form>
         </x-ui.card>
+
+        <form method="POST" action="{{ route('admin.operational-recaps.generate') }}" class="flex flex-wrap items-end gap-3">
+            @csrf
+            <x-form.field label="Tanggal rekap" for="recap_date" :error="$errors->first('recap_date')" class="w-full sm:w-56">
+                <x-form.input id="recap_date" name="recap_date" type="date" :value="$filters['date'] ?: now(config('mms.timezone'))->toDateString()" required />
+            </x-form.field>
+            <x-ui.button type="submit">Perbarui Rekap</x-ui.button>
+        </form>
 
         @if ($recaps->isEmpty())
             <x-ui.empty-state title="Rekap belum tersedia" description="Belum ada rekap sesuai filter." />
