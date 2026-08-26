@@ -187,7 +187,7 @@
                     id="tracking-map-index"
                     class="mms-map-overview"
                     data-tracking-map
-                    data-markers='@js($markers)'
+                    data-markers="{{ \Illuminate\Support\Js::encode($markers) }}"
                     data-poll-seconds="{{ $pollingSeconds }}"
                     data-feed-url="{{ route('admin.tracking.feed', array_filter($filters)) }}"
                     aria-label="Peta tracking marketing"

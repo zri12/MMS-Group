@@ -109,8 +109,8 @@
                     id="journey-map"
                     class="mms-journey-map"
                     data-tracking-map
-                    data-markers='@js($markers)'
-                    data-path='@js($path)'
+                    data-markers="{{ \Illuminate\Support\Js::encode($markers) }}"
+                    data-path="{{ \Illuminate\Support\Js::encode($path) }}"
                     aria-label="Peta rute perjalanan {{ $session->marketingProfile->user->name }}"
                 ></div>
             </div>

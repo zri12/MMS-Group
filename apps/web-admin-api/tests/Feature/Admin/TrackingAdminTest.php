@@ -45,6 +45,8 @@ class TrackingAdminTest extends TestCase
             ->assertOk()
             ->assertSee('Tracking PDL')
             ->assertSee('data-tracking-map', false)
+            ->assertSee('data-markers="[{&quot;lat&quot;:-6.9388', false)
+            ->assertDontSee('data-markers=\'JSON.parse(', false)
             ->assertSee('M01 - Marketing M01')
             ->assertSee('Detail Tracking');
 

@@ -43,8 +43,8 @@
                     id="tracking-map-detail"
                     class="mms-map-detail"
                     data-tracking-map
-                    data-markers='@js($markers)'
-                    data-path='@js($path)'
+                    data-markers="{{ \Illuminate\Support\Js::encode($markers) }}"
+                    data-path="{{ \Illuminate\Support\Js::encode($path) }}"
                     aria-label="Peta rute tracking"
                 ></div>
             </div>
