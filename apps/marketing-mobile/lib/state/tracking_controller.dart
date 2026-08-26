@@ -74,7 +74,11 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   /// repeatedly — e.g. on every healthy `/health` tick — as a cheap retry
   /// if the initial attempt failed while offline.
   Future<void> ensureStarted() async {
-    if (_starting || isActive) return;
+    if (_starting) return;
+    if (isActive) {
+      _resumeSampling();
+      return;
+    }
     if (DateTime.now().weekday == DateTime.sunday) return;
     _starting = true;
     try {
@@ -105,7 +109,13 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
     _sampleTimer ??= Timer.periodic(_sampleInterval, (_) => _sample());
     _positionSubscription ??= _locationService.positionStream().listen(
       _recordPosition,
-      onError: (_, __) {},
+      onError: (_, __) {
+        // A permission change can invalidate the existing stream. Clear it
+        // so the periodic health check can subscribe again after the PDL
+        // enables location access in device settings.
+        _positionSubscription?.cancel();
+        _positionSubscription = null;
+      },
     );
     unawaited(_sample());
   }
@@ -143,6 +153,7 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
     _lastSampleAt = now;
     _pendingPoints.add(
       TrackingPoint(
+        localUuid: newLocalUuid(),
         latitude: position.latitude,
         longitude: position.longitude,
         pointType: 'Perjalanan',

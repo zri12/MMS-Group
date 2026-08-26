@@ -3,12 +3,14 @@ import '../api/api_client.dart';
 /// One GPS sample within a tracking session. `pointType` matches the
 /// server's enum (`Mulai`/`Perjalanan`/`Kunjungan`/`Selesai`).
 class TrackingPoint {
+  final String localUuid;
   final double latitude;
   final double longitude;
   final String pointType;
   final DateTime recordedAt;
 
   const TrackingPoint({
+    required this.localUuid,
     required this.latitude,
     required this.longitude,
     required this.pointType,
@@ -16,6 +18,7 @@ class TrackingPoint {
   });
 
   Map<String, dynamic> toJson() => {
+    'local_uuid': localUuid,
     'latitude': latitude,
     'longitude': longitude,
     'point_type': pointType,
@@ -24,6 +27,7 @@ class TrackingPoint {
 
   factory TrackingPoint.fromJson(Map<String, dynamic> json) {
     return TrackingPoint(
+      localUuid: json['local_uuid'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       pointType: (json['point_type'] ?? 'Perjalanan') as String,

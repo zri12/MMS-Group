@@ -178,22 +178,11 @@ return [
             'MMS_MAX_TRACKING_BATCH_POINTS',
             100
         ),
-    ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Development Seed
-    |--------------------------------------------------------------------------
-    |
-    | Seeder hanya untuk local/testing. Password wajib disediakan melalui
-    | environment/config dan tidak boleh dicetak ke output.
-    |
-    */
-
-    'seed' => [
-        'admin_username' => env('MMS_SEED_ADMIN_USERNAME', 'admin'),
-        'admin_email' => env('MMS_SEED_ADMIN_EMAIL', 'admin@mms.local'),
-        'default_password' => env('MMS_SEED_DEFAULT_PASSWORD'),
+        'gps_stale_seconds' => max(30, (int) env(
+            'MMS_TRACKING_GPS_STALE_SECONDS',
+            180
+        )),
     ],
 
 ];

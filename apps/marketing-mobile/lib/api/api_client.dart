@@ -94,7 +94,10 @@ class ApiClient {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8000/api/v1',
+    // A physical device cannot reach its server through `localhost`. The
+    // invalid default prevents a release APK from accidentally targeting the
+    // customer's own phone; every install must be built with API_BASE_URL.
+    defaultValue: 'https://mms.invalid/api/v1',
   );
 
   /// Resolves a possibly-relative media URL (e.g. an attachment's

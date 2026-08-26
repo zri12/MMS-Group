@@ -11,6 +11,7 @@ use App\Models\MarketingSchedule;
 use App\Models\TrackingPoint;
 use App\Models\TrackingSession;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -111,35 +112,32 @@ class TrackingAdminTest extends TestCase
             ->assertJsonPath('data.markers.0.lng', 107.7079);
     }
 
-    public function test_admin_can_view_tracking_for_demo_pdl_without_login_account(): void
+    public function test_live_tracking_marks_stale_gps_as_inactive(): void
     {
-        $admin = User::factory()->admin()->create();
-        $profile = MarketingProfile::factory()->create([
-            'user_id' => null,
-            'display_name' => 'Siti Rahma',
-            'code' => 'PDL01',
-        ]);
-        $session = TrackingSession::factory()->active()->create([
-            'marketing_profile_id' => $profile->id,
-            'session_date' => '2026-07-20',
-            'day_name' => DayName::Monday->value,
-            'status' => TrackingStatus::Active->value,
-        ]);
-        TrackingPoint::factory()->create([
-            'tracking_session_id' => $session->id,
-            'latitude' => -6.9388,
-            'longitude' => 107.7079,
-        ]);
+        CarbonImmutable::setTestNow('2026-07-20 09:00:00');
+        config()->set('mms.tracking.gps_stale_seconds', 180);
 
-        $this->actingAs($admin)
-            ->get('/admin/tracking?date=2026-07-20&status=Aktif')
-            ->assertOk()
-            ->assertSee('PDL01 - Siti Rahma');
+        try {
+            $admin = User::factory()->admin()->create();
+            $marketing = $this->marketingProfile('M01');
+            $session = TrackingSession::factory()->active()->create([
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-07-20',
+                'day_name' => DayName::Monday->value,
+            ]);
+            TrackingPoint::factory()->create([
+                'tracking_session_id' => $session->id,
+                'recorded_at' => '2026-07-20 08:50:00',
+                'received_at' => '2026-07-20 08:50:00',
+            ]);
 
-        $this->actingAs($admin)
-            ->get(route('admin.tracking.show', $session))
-            ->assertOk()
-            ->assertSee('Siti Rahma');
+            $this->actingAs($admin)
+                ->getJson('/admin/tracking/feed?date=2026-07-20&status=GPS%20Tidak%20Aktif')
+                ->assertOk()
+                ->assertJsonPath('data.markers.0.status', 'GPS Tidak Aktif');
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     public function test_tracking_ui_uses_feed_polling_without_full_page_reload(): void

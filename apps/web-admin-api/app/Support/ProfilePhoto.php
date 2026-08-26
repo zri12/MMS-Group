@@ -16,12 +16,6 @@ class ProfilePhoto
             return Storage::disk('public')->url($profile->profile_photo_path);
         }
 
-        $number = (int) preg_replace('/\D+/', '', $profile->code);
-
-        if ($number >= 1 && $number <= 13) {
-            return asset('profiles/marketing-'.str_pad((string) $number, 2, '0', STR_PAD_LEFT).'.jpg');
-        }
-
         return '';
     }
 
@@ -31,8 +25,6 @@ class ProfilePhoto
             return Storage::disk('public')->url($member->member_photo_path);
         }
 
-        $number = (($member->id - 1) % 16) + 1;
-
-        return asset('profiles/member-'.str_pad((string) $number, 2, '0', STR_PAD_LEFT).'.jpg');
+        return '';
     }
 }

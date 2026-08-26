@@ -15,9 +15,12 @@ npm run build
 php artisan serve
 ```
 
-Gunakan MySQL lokal dan isi variabel `DB_*` pada `.env`. Database operasional
-utama menggunakan `mms_monitoring`; data simulasi tidak digunakan pada
-environment production.
+Gunakan MySQL lokal dan isi variabel `DB_*` pada `.env`. Setelah migration,
+buat administrator pertama secara eksplisit:
+
+```powershell
+php artisan mms:provision-admin --name="Administrator MMS" --username=admin --email=admin@local.test --password="ganti-dengan-password-kuat"
+```
 
 ## Produksi cPanel
 
@@ -30,6 +33,7 @@ environment production.
 composer install --no-dev --optimize-autoloader
 npm ci && npm run build
 php artisan migrate --force
+php artisan mms:provision-admin --name="Administrator MMS" --username=admin --email=admin@domain-anda.tld --password="password-kuat"
 php artisan storage:link
 php artisan optimize
 ```

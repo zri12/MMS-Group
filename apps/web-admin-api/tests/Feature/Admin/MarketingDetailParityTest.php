@@ -56,7 +56,6 @@ class MarketingDetailParityTest extends TestCase
             ->assertSee('Laporan Operasional')
             ->assertSee('Kunjungan')
             ->assertSee('Riwayat')
-            ->assertSee('profiles/marketing-01.jpg')
             ->assertSee('Siti Aminah')
             ->assertSee('Budi Santoso')
             ->assertSee('Follow up calon anggota');

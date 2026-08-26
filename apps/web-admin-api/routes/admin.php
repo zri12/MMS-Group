@@ -56,7 +56,4 @@ Route::prefix('admin')
             ->only(['index', 'show'])
             ->parameters(['journeys' => 'trackingSession']);
 
-        if (app()->environment(['local', 'testing'])) {
-            Route::view('design-system', 'admin.design-system.index')->name('design-system');
-        }
     });

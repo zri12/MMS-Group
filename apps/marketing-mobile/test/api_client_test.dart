@@ -195,6 +195,7 @@ void main() {
             },
             'points': [
               {
+                'local_uuid': 'b15b52c8-177e-438c-9c54-9cff4f31a6af',
                 'latitude': -6.9,
                 'longitude': 107.7,
                 'point_type': 'Perjalanan',
