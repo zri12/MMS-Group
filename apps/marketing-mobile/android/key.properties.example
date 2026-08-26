@@ -1,4 +1,6 @@
-storePassword=replace-with-keystore-password
-keyPassword=replace-with-key-password
-keyAlias=replace-with-key-alias
-storeFile=../release-keystore.jks
+# Do not commit android/key.properties or the referenced keystore.
+# Generate and retain the production keystore outside this repository.
+storePassword=replace_with_keystore_password
+keyPassword=replace_with_key_password
+keyAlias=mms-marketing
+storeFile=../keystore/mms-marketing.jks
