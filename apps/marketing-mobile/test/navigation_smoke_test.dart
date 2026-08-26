@@ -39,6 +39,9 @@ class _FakeLocationService extends LocationService {
     speed: 0,
     speedAccuracy: 0,
   );
+
+  @override
+  Stream<Position> positionStream() => const Stream.empty();
 }
 
 /// Stubs `/api/v1/tracking/sessions*` — TrackingController.ensureStarted()

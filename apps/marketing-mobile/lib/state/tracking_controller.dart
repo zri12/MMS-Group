@@ -13,18 +13,17 @@ import '../services/tracking_service.dart';
 /// run, per the product decision recorded in BACKEND_INTEGRATION_TASKS.md
 /// (2026-08-21): one continuous session per work day, started automatically
 /// on login/app-open and stopped on logout — not a per-visit session, and
-/// not silently tracked in the background (GPS sampling only runs while the
-/// app is actually in the foreground, honoring the standing "do NOT
-/// implement background/silent tracking" rule; the *session* spans the
-/// whole day, but *points* are only ever sampled while the app is open).
-///
-/// The GPS sample interval below is a placeholder, not a business-confirmed
-/// number (see BACKEND_INTEGRATION_TASKS.md's "Do NOT implement" list).
+/// receives updates in the background after the PDL grants the explicitly
+/// requested location-always permission. Android keeps tracking visible
+/// through a foreground notification while the session remains active.
 class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
-  TrackingController({TrackingService? service, LocationService? locationService, SyncQueueStore? syncQueueStore})
-      : _service = service ?? TrackingService(),
-        _locationService = locationService ?? LocationService(),
-        _syncStore = syncQueueStore ?? createDefaultSyncQueueStore() {
+  TrackingController({
+    TrackingService? service,
+    LocationService? locationService,
+    SyncQueueStore? syncQueueStore,
+  }) : _service = service ?? TrackingService(),
+       _locationService = locationService ?? LocationService(),
+       _syncStore = syncQueueStore ?? createDefaultSyncQueueStore() {
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -48,7 +47,9 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   Position? _lastPosition;
   DateTime? _lastSampleAt;
   DateTime? get lastSampleAt => _lastSampleAt;
-  String? get lastLocationLabel => _lastPosition == null ? null : '${_lastPosition!.latitude.toStringAsFixed(4)}, ${_lastPosition!.longitude.toStringAsFixed(4)}';
+  String? get lastLocationLabel => _lastPosition == null
+      ? null
+      : '${_lastPosition!.latitude.toStringAsFixed(4)}, ${_lastPosition!.longitude.toStringAsFixed(4)}';
 
   double _distanceMeters = 0;
   double get distanceMeters => _distanceMeters;
@@ -57,14 +58,13 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
 
   final List<TrackingPoint> _pendingPoints = [];
   Timer? _sampleTimer;
+  StreamSubscription<Position>? _positionSubscription;
   bool _starting = false;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _resumeSampling();
-    } else {
-      _pauseSampling();
     }
   }
 
@@ -79,7 +79,12 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
     _starting = true;
     try {
       final current = await _service.current();
-      _session = current ?? await _service.start(localUuid: newLocalUuid(), startedAt: DateTime.now());
+      _session =
+          current ??
+          await _service.start(
+            localUuid: newLocalUuid(),
+            startedAt: DateTime.now(),
+          );
       notifyListeners();
       _resumeSampling();
     } on ApiException {
@@ -97,33 +102,55 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
 
   void _resumeSampling() {
     if (!isActive) return;
-    _sampleTimer?.cancel();
-    _sampleTimer = Timer.periodic(_sampleInterval, (_) => _sample());
+    _sampleTimer ??= Timer.periodic(_sampleInterval, (_) => _sample());
+    _positionSubscription ??= _locationService.positionStream().listen(
+      _recordPosition,
+      onError: (_, __) {},
+    );
     unawaited(_sample());
   }
 
   void _pauseSampling() {
     _sampleTimer?.cancel();
     _sampleTimer = null;
+    _positionSubscription?.cancel();
+    _positionSubscription = null;
   }
 
   Future<void> _sample() async {
     if (!isActive) return;
     try {
-      final pos = await _locationService.getCurrentPosition();
-      final now = DateTime.now();
-      if (_lastPosition != null) {
-        _distanceMeters += Geolocator.distanceBetween(_lastPosition!.latitude, _lastPosition!.longitude, pos.latitude, pos.longitude);
-      }
-      _lastPosition = pos;
-      _lastSampleAt = now;
-      _pendingPoints.add(TrackingPoint(latitude: pos.latitude, longitude: pos.longitude, pointType: 'Perjalanan', recordedAt: now));
-      notifyListeners();
-      if (_pendingPoints.length >= _flushEveryPoints) await _flush();
+      _recordPosition(await _locationService.getCurrentPosition());
     } on LocationServiceException {
       // GPS unavailable this tick (disabled/denied/timeout) — skip, retried
       // automatically on the next periodic tick.
     }
+  }
+
+  void _recordPosition(Position position) {
+    if (!isActive) return;
+
+    final now = DateTime.now();
+    if (_lastPosition != null) {
+      _distanceMeters += Geolocator.distanceBetween(
+        _lastPosition!.latitude,
+        _lastPosition!.longitude,
+        position.latitude,
+        position.longitude,
+      );
+    }
+    _lastPosition = position;
+    _lastSampleAt = now;
+    _pendingPoints.add(
+      TrackingPoint(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        pointType: 'Perjalanan',
+        recordedAt: now,
+      ),
+    );
+    notifyListeners();
+    if (_pendingPoints.length >= _flushEveryPoints) unawaited(_flush());
   }
 
   /// Sends the buffered points immediately. On a connection failure, they
@@ -142,17 +169,24 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       await _service.pointsBatch(session.id, toSend);
     } on ApiException catch (e) {
-      if (e.statusCode != null) return; // permanent server-side rejection — nothing honest to retry
+      if (e.statusCode != null) {
+        return; // permanent server-side rejection — nothing honest to retry
+      }
       final now = DateTime.now();
-      await _syncStore.enqueue(SyncQueueEntry(
-        entityType: 'tracking_points',
-        localUuid: newLocalUuid(),
-        operation: 'create',
-        payloadJson: jsonEncode({'session_id': session.id, 'points': toSend.map((p) => p.toJson()).toList()}),
-        status: SyncQueueStatus.menungguSinkronisasi,
-        createdAt: now,
-        updatedAt: now,
-      ));
+      await _syncStore.enqueue(
+        SyncQueueEntry(
+          entityType: 'tracking_points',
+          localUuid: newLocalUuid(),
+          operation: 'create',
+          payloadJson: jsonEncode({
+            'session_id': session.id,
+            'points': toSend.map((p) => p.toJson()).toList(),
+          }),
+          status: SyncQueueStatus.menungguSinkronisasi,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
     }
   }
 
@@ -163,7 +197,12 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
     if (session == null) return;
     await _flush();
     try {
-      await _service.stop(session.id, endedAt: DateTime.now(), visitCount: _visitCount, distanceMeters: _distanceMeters);
+      await _service.stop(
+        session.id,
+        endedAt: DateTime.now(),
+        visitCount: _visitCount,
+        distanceMeters: _distanceMeters,
+      );
     } on ApiException {
       // Best-effort — if this fails, the session simply stays active
       // server-side until the next successful stop.
@@ -181,7 +220,7 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _sampleTimer?.cancel();
+    _pauseSampling();
     super.dispose();
   }
 }

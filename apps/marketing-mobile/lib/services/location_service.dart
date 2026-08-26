@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 
@@ -33,25 +34,65 @@ class LocationService {
   /// user-facing Indonesian message on failure (GPS disabled, permission
   /// denied, timeout) rather than a raw platform exception.
   Future<Position> getCurrentPosition() async {
+    await _ensureLocationAccess();
+
+    try {
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15),
+        ),
+      );
+    } catch (_) {
+      throw const LocationServiceException(
+        'Gagal mendapatkan lokasi. Coba lagi.',
+      );
+    }
+  }
+
+  Stream<Position> positionStream() async* {
+    await _ensureLocationAccess();
+
+    yield* Geolocator.getPositionStream(locationSettings: _trackingSettings());
+  }
+
+  Future<void> _ensureLocationAccess() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      throw const LocationServiceException('Layanan lokasi tidak aktif. Aktifkan GPS perangkat Anda.');
+      throw const LocationServiceException(
+        'Layanan lokasi tidak aktif. Aktifkan GPS perangkat Anda.',
+      );
     }
 
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-      throw const LocationServiceException('Izin lokasi ditolak. Aktifkan izin lokasi di pengaturan aplikasi.');
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw const LocationServiceException(
+        'Izin lokasi ditolak. Aktifkan izin lokasi di pengaturan aplikasi.',
+      );
+    }
+  }
+
+  LocationSettings _trackingSettings() {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
+        intervalDuration: const Duration(seconds: 15),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationTitle: 'Tracking KSP MMS aktif',
+          notificationText: 'Lokasi PDL sedang diperbarui.',
+          enableWakeLock: true,
+        ),
+      );
     }
 
-    try {
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 15)),
-      );
-    } catch (_) {
-      throw const LocationServiceException('Gagal mendapatkan lokasi. Coba lagi.');
-    }
+    return const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    );
   }
 }
