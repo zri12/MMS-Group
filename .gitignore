@@ -57,3 +57,7 @@ Thumbs.db
 mms-mysql-*.cnf
 mysql-client-*.cnf
 *.mysql.cnf
+
+# Flutter source is versioned by this repository. Keep its previous Git
+# metadata only as a local recovery copy while it is being integrated.
+/apps/marketing-mobile/.git-history-backup/

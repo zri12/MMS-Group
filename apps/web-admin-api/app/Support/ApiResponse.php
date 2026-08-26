@@ -10,7 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * Helper untuk membentuk response API dengan format envelope yang konsisten.
  *
- * Format mengikuti kontrak API pada docs/09_API_CONTRACT.md.
+ * Format dipakai oleh seluruh endpoint aplikasi marketing.
  */
 final class ApiResponse
 {

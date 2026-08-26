@@ -40,6 +40,8 @@ class StoreOperationalReportRequest extends ApiFormRequest
             'total_target_people' => ['required', 'integer', 'min:0'],
             'new_drop' => ['required', 'integer', 'min:0'],
             'continued_drop' => ['required', 'integer', 'min:0'],
+            'incoming_member_count' => ['prohibited'],
+            'outgoing_member_count' => ['prohibited'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'attachments' => ['nullable', 'array', 'max:2'],
             'attachments.*.type' => ['required_with:attachments', 'string', 'distinct:strict', Rule::in(array_map(fn (OperationalAttachmentType $type) => $type->value, OperationalAttachmentType::cases()))],

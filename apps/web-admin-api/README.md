@@ -1,69 +1,45 @@
-# MMS Web Admin API
+# MMS Web Admin
 
-Project ini adalah Laravel 12 aktif untuk MMS Marketing Monitoring System.
+Laravel 12 untuk web admin MMS dan endpoint `/api/v1` yang digunakan aplikasi
+marketing Flutter.
 
-## Stack
+## Konfigurasi Lokal
 
-- Laravel 12
-- PHP 8.2+
-- Blade
-- Livewire
-- Tailwind CSS
-- Alpine.js bawaan Livewire
-- Vite
-- Laravel Sanctum
-- REST API v1
-- MySQL/MariaDB direncanakan untuk production
-
-Web Admin dibangun dengan Blade/Livewire. Project aktif tidak menggunakan React, Inertia.js, TypeScript, TSX, React Router, React Context, atau React Leaflet.
-
-## Setup Lokal
-
-```bash
+```powershell
 composer install
-npm install
+npm ci
 copy .env.example .env
 php artisan key:generate
-php artisan optimize:clear
-```
-
-Jangan menjalankan migration domain MMS sampai tahap database selesai dan disetujui.
-
-## Development
-
-```bash
-php artisan serve
-npm run dev
-```
-
-## Build dan Test
-
-```bash
+php artisan migrate --force
 npm run build
+php artisan serve
+```
+
+Gunakan MySQL lokal dan isi variabel `DB_*` pada `.env`. Database operasional
+utama menggunakan `mms_monitoring`; data simulasi tidak digunakan pada
+environment production.
+
+## Produksi cPanel
+
+1. Salin `.env.example` menjadi `.env`, lalu isi URL HTTPS, kredensial MySQL,
+   konfigurasi email, dan `APP_KEY` yang unik.
+2. Arahkan document root domain ke folder `public` aplikasi ini.
+3. Jalankan perintah berikut dari root aplikasi Laravel:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize
+```
+
+4. Berikan izin tulis pada `storage` dan `bootstrap/cache`.
+
+## Verifikasi
+
+```bash
 php artisan test
-composer validate
+composer validate --strict
+npm run build
 ```
-
-## Route Fondasi
-
-- `GET /`
-- `GET /api/v1/health`
-
-Endpoint bisnis, autentikasi admin, migration domain, model domain, CRUD, dan Flutter belum dibuat pada tahap fondasi ini.
-
-## Runtime Fondasi
-
-Fondasi ini tidak membutuhkan tabel database untuk session, cache, atau queue.
-
-```env
-SESSION_DRIVER=file
-CACHE_STORE=file
-QUEUE_CONNECTION=sync
-FILESYSTEM_DISK=public
-```
-
-Database contoh tetap MySQL/MariaDB untuk tahap domain berikutnya. Jangan menjalankan `php artisan migrate` sampai migration domain selesai direview.
-
-## Source Bersih
-
-Jangan masukkan `.env`, `vendor/`, `node_modules/`, `public/build/`, `database/database.sqlite`, `storage/logs/`, `storage/framework/views/`, `bootstrap/cache/*.php`, `.phpunit.result.cache`, file ZIP, atau artefak tool/cache ke paket source. Dependency dapat dibuat ulang dengan `composer install`, `npm install` atau `npm ci`, dan `npm run build`.

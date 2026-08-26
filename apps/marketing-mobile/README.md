@@ -1,39 +1,35 @@
 # MMS Marketing Mobile
 
-Folder ini disiapkan untuk **aplikasi marketing Flutter** yang merupakan bagian dari
-MMS Marketing Monitoring System oleh KSP Manunggal Makmur Sejahtera.
+Aplikasi Flutter untuk marketing yang berkomunikasi hanya melalui layanan
+Laravel pada `/api/v1`.
 
-## Status
+## Menjalankan Lokal
 
-Project Flutter **belum dibuat** pada tahap ini. Folder ini adalah placeholder
-yang akan diisi setelah REST API inti stabil.
+```bash
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
+```
 
-## Rencana Teknologi
+Gunakan `10.0.2.2` dari Android Emulator. Pada perangkat fisik, ganti dengan
+alamat IP LAN komputer server, misalnya
+`http://192.168.1.10:8000/api/v1`.
 
-| Bagian | Teknologi |
-|---|---|
-| Framework | Flutter |
-| Language | Dart |
-| HTTP client | Dio |
-| Autentikasi | Laravel Sanctum (token via REST API) |
-| Local database | SQLite melalui sqflite |
-| Token storage | flutter_secure_storage |
-| GPS | geolocator |
-| Maps | flutter_map + OpenStreetMap |
-| Background sync | workmanager |
-| State management | Provider |
-| Routing | go_router |
+## Build Rilis
 
-## Integrasi
+Gunakan domain HTTPS yang sudah dideploy pada Laravel:
 
-- Aplikasi Flutter mengakses server melalui REST API pada `/api/v1`.
-- Flutter **tidak** terhubung langsung ke MySQL.
-- Autentikasi menggunakan Laravel Sanctum personal access token.
-- Data offline disimpan menggunakan SQLite (`sqflite`).
-- Sinkronisasi ke server menggunakan `local_uuid` untuk mencegah duplikasi.
+```bash
+flutter build apk --release --dart-define=API_BASE_URL=https://domain-anda/api/v1
+```
 
-## Catatan
+Sebelum rilis, buat `android/key.properties` dari
+`android/key.properties.example` dan isi dengan lokasi serta kredensial
+keystore Android yang disimpan aman di luar Git.
 
-- Jangan membuat source Flutter pada tahap ini.
-- Jangan menjalankan `flutter create` pada tahap ini.
-- Project Flutter dibuat setelah REST API inti stabil dan diuji.
+## Verifikasi
+
+```bash
+flutter analyze
+flutter test
+flutter build apk --release --dart-define=API_BASE_URL=https://domain-anda/api/v1
+```

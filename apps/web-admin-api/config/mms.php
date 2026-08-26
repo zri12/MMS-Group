@@ -164,8 +164,7 @@ return [
     | Tracking
     |--------------------------------------------------------------------------
     |
-    | Nilai ini adalah konfigurasi awal. Bukan business rule final.
-    | Lihat docs/22_OPEN_QUESTIONS.md untuk item yang belum dikonfirmasi.
+    | Nilai ini dapat diatur melalui environment sesuai kebutuhan operasional.
     |
     */
 

@@ -45,12 +45,16 @@ class DashboardController extends Controller
             ->join('operational_recap_rows', 'operational_recap_rows.operational_recap_id', '=', 'operational_recaps.id')
             ->sum('operational_recap_rows.current_circulation');
 
+        $reportPeriod = function ($query) use ($date, $selectedDay): void {
+            $query->whereDate('report_date', $date)
+                ->where('day_name', $selectedDay->value);
+        };
+
         $pdlProfiles = MarketingProfile::query()
             ->with('user')
-            ->withSum('dailyOperationalReports as target_total', 'total_target_amount')
-            ->withSum('dailyOperationalReports as drop_total', 'drop_amount')
-            ->withSum('dailyOperationalReports as storting_total', 'storting')
-            ->whereNotNull('display_name')
+            ->withSum(['dailyOperationalReports as target_total' => $reportPeriod], 'total_target_amount')
+            ->withSum(['dailyOperationalReports as drop_total' => $reportPeriod], 'drop_amount')
+            ->withSum(['dailyOperationalReports as storting_total' => $reportPeriod], 'storting')
             ->orderBy('code')
             ->get()
             ->map(fn (MarketingProfile $profile): array => [
@@ -65,10 +69,13 @@ class DashboardController extends Controller
                 'detail_url' => route('admin.marketing.show', $profile),
             ]);
 
-        $attachmentPanels = collect(OperationalAttachmentType::cases())->mapWithKeys(function (OperationalAttachmentType $type): array {
+        $attachmentPanels = collect(OperationalAttachmentType::cases())->mapWithKeys(function (OperationalAttachmentType $type) use ($date, $selectedDay): array {
             $attachments = OperationalReportAttachment::query()
                 ->with(['dailyOperationalReport.marketingProfile.user'])
                 ->where('type', $type->value)
+                ->whereHas('dailyOperationalReport', fn ($query) => $query
+                    ->whereDate('report_date', $date)
+                    ->where('day_name', $selectedDay->value))
                 ->latest('uploaded_at')
                 ->latest('id')
                 ->limit(3)

@@ -173,7 +173,6 @@ class DashboardTest extends TestCase
         $profile = MarketingProfile::factory()->create([
             'user_id' => $user->id,
             'code' => $code,
-            'display_name' => 'Marketing '.$code,
             'area' => 'Gedebage',
         ]);
 

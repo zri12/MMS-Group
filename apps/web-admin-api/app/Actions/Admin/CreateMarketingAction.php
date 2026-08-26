@@ -31,6 +31,7 @@ class CreateMarketingAction
             $profile = MarketingProfile::query()->create([
                 'user_id' => $user->id,
                 'code' => $data['code'],
+                'display_name' => $user->name,
                 'phone' => $data['phone'] ?? null,
                 'area' => $data['area'],
                 'profile_photo_path' => $this->storePhoto($data['profile_photo'] ?? null),

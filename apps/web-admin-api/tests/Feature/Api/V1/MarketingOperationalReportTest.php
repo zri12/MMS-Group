@@ -128,6 +128,19 @@ class MarketingOperationalReportTest extends TestCase
         $response->assertJsonValidationErrors(['storting', 'drop']);
     }
 
+    public function test_operational_report_rejects_removed_member_count_fields(): void
+    {
+        [, $token] = $this->marketingToken('M01');
+
+        $this->withToken($token)
+            ->postJson('/api/v1/operational-reports', $this->payload([
+                'incoming_member_count' => 2,
+                'outgoing_member_count' => 1,
+            ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['incoming_member_count', 'outgoing_member_count']);
+    }
+
     public function test_duplicate_operational_report_local_uuid_from_other_marketing_is_conflict(): void
     {
         [, $token] = $this->marketingToken('M01');
