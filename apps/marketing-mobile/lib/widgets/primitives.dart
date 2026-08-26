@@ -22,7 +22,7 @@ class KspLogo extends StatelessWidget {
       ),
       child: ClipOval(
         child: Image.asset(
-          'assets/images/logo-ksp.jpg',
+          'assets/images/LOGO-KSP.jpeg',
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const Icon(LucideIcons.landmark, color: AppColors.gold),
         ),

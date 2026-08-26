@@ -71,7 +71,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/logo-ksp.jpg
+    - assets/images/LOGO-KSP.jpeg
     - assets/images/report-visit.jpg
 
   # To add assets to your application, add an assets section, like this:

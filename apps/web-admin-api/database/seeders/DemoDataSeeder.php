@@ -119,5 +119,56 @@ class DemoDataSeeder extends Seeder
                 'current_circulation' => [39_500_000, 36_000_000, 39_500_000, 34_500_000, 36_500_000, 37_500_000][$index], 'followed_by' => 'Demo', 'morning_cash' => 0,
             ]);
         });
+
+        $this->seedCurrentTrackingForMarketing($today, $day);
+    }
+
+    private function seedCurrentTrackingForMarketing(CarbonImmutable $today, DayName $day): void
+    {
+        MarketingProfile::query()
+            ->whereHas('user', fn ($query) => $query->where('is_active', true))
+            ->orderBy('code')
+            ->get()
+            ->values()
+            ->each(function (MarketingProfile $profile, int $index) use ($today, $day): void {
+                $session = TrackingSession::query()->updateOrCreate(
+                    [
+                        'marketing_profile_id' => $profile->id,
+                        'session_date' => $today->toDateString(),
+                    ],
+                    [
+                        'local_uuid' => sprintf('70000000-0000-4000-8000-%012d', ((int) $today->format('Ymd') * 100) + $index + 1),
+                        'day_name' => $day->value,
+                        'started_at' => $today->setTime(8, 0)->addMinutes($index * 5),
+                        'ended_at' => $index < 5 ? null : $today->setTime(15, 0)->addMinutes($index * 5),
+                        'status' => $index < 5 ? TrackingStatus::Active->value : TrackingStatus::Offline->value,
+                        'distance_meters' => 4200 + ($index * 350),
+                        'visit_count' => 1 + ($index % 3),
+                    ],
+                );
+
+                $latitude = -6.914744 + ($index * 0.006);
+                $longitude = 107.609810 + ($index * 0.007);
+                $recordedAt = $today->setTime(8, 20)->addMinutes($index * 5);
+
+                TrackingPoint::query()->updateOrCreate(
+                    [
+                        'local_uuid' => sprintf('71000000-0000-4000-8000-%012d', ((int) $today->format('Ymd') * 100) + $index + 1),
+                    ],
+                    [
+                        'tracking_session_id' => $session->id,
+                        'latitude' => $latitude,
+                        'longitude' => $longitude,
+                        'accuracy_meters' => 8.5,
+                        'speed_mps' => 1.2,
+                        'heading' => 90,
+                        'altitude_meters' => 730,
+                        'address' => $profile->area.', Kota Bandung',
+                        'point_type' => TrackingPointType::Journey->value,
+                        'recorded_at' => $recordedAt,
+                        'received_at' => $recordedAt->addSeconds(5),
+                    ],
+                );
+            });
     }
 }

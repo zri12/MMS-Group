@@ -8,8 +8,10 @@ use App\Models\Member;
 use App\Models\Prospect;
 use App\Models\TrackingPoint;
 use App\Models\TrackingSession;
+use Carbon\CarbonImmutable;
 use Database\Seeders\AdminSeeder;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\DemoDataSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -18,6 +20,13 @@ use Tests\TestCase;
 class DevelopmentSeederTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config()->set('mms.seed.default_password', 'MmsTestingOnly123!');
+    }
 
     public function test_development_seeders_create_deterministic_domain_dataset(): void
     {
@@ -78,5 +87,27 @@ class DevelopmentSeederTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         (new AdminSeeder)->run();
+    }
+
+    public function test_demo_seeder_creates_current_tracking_points_for_each_marketing_account(): void
+    {
+        CarbonImmutable::setTestNow('2026-08-26 10:00:00');
+
+        try {
+            $this->seed(DatabaseSeeder::class);
+            $this->seed(DemoDataSeeder::class);
+
+            $sessions = TrackingSession::query()
+                ->whereDate('session_date', '2026-08-26')
+                ->whereHas('marketingProfile.user', fn ($query) => $query->where('is_active', true))
+                ->withCount('points')
+                ->get();
+
+            $this->assertCount(13, $sessions);
+            $this->assertSame(13, $sessions->where('status', 'Aktif')->count() + $sessions->where('status', 'Offline')->count());
+            $this->assertSame(13, $sessions->where('points_count', 1)->count());
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 }

@@ -3,7 +3,7 @@
 ])
 
 @php
-    $logoUrl = asset('storage/LOGO-KSP.jpeg');
+    $logoUrl = asset('images/LOGO-KSP.jpeg');
 @endphp
 
 <div {{ $attributes->class(['flex min-w-0 items-center gap-3']) }}>
