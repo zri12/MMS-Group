@@ -32,7 +32,7 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   final LocationService _locationService;
   final SyncQueueStore _syncStore;
 
-  static const _sampleInterval = Duration(seconds: 60);
+  static const _sampleInterval = Duration(seconds: 30);
   // Flush after every sample (not batched) so a new point reaches the
   // server within one sample interval — the admin dashboard polls
   // GET /tracking/... every 30s (see docs/37_TRACKING_MODULE.md,

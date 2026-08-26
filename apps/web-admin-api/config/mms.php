@@ -171,7 +171,7 @@ return [
     'tracking' => [
         'polling_seconds' => (int) env(
             'MMS_TRACKING_POLLING_SECONDS',
-            30
+            15
         ),
 
         'max_batch_points' => (int) env(

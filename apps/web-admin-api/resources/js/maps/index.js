@@ -64,16 +64,21 @@ function escapeAttribute(value) {
 }
 
 function avatarMarkerIcon(marker) {
-    if (!marker.photo_url) {
-        return undefined;
-    }
+    const initial = String(marker.label ?? 'P')
+        .replace(/^.*-\s*/, '')
+        .trim()
+        .charAt(0)
+        .toUpperCase() || 'P';
+    const photo = marker.photo_url
+        ? `<img src="${escapeAttribute(marker.photo_url)}" alt="" onerror="this.remove()">`
+        : '';
 
     return L.divIcon({
         className: '',
-        html: `<span class="real-map-avatar"><img src="${escapeAttribute(marker.photo_url)}" alt=""></span>`,
-        iconSize: [40, 40],
-        iconAnchor: [20, 20],
-        popupAnchor: [0, -20],
+        html: `<span class="real-map-avatar">${photo}<span class="real-map-avatar-fallback">${escapeAttribute(initial)}</span></span>`,
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+        popupAnchor: [0, -22],
     });
 }
 
@@ -99,7 +104,7 @@ function initializeTrackingMap(element) {
     const markers = parseDatasetJson(element.dataset.markers);
     const path = parseDatasetJson(element.dataset.path);
     const map = L.map(element, {
-        scrollWheelZoom: false,
+        scrollWheelZoom: true,
     }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -155,11 +160,9 @@ function initializeTrackingMap(element) {
     element._mmsMap = map;
     element._mmsBounds = bounds;
     element._mmsRefreshMarkers = (nextMarkers) => {
-        const nextBounds = renderMarkers(nextMarkers);
-
-        if (nextBounds.isValid()) {
-            fitMap(map, nextBounds);
-        }
+        // Keep the administrator's chosen zoom and map position while new GPS
+        // points arrive. The Fit control remains available when recentering is wanted.
+        renderMarkers(nextMarkers);
     };
     fitMap(map, bounds);
 
@@ -234,6 +237,13 @@ function initializeTrackingPolling() {
 
                 if (Array.isArray(markers)) {
                     pollingElement._mmsRefreshMarkers(markers);
+                }
+
+                const updatedAt = payload?.data?.updated_at;
+                const updatedLabel = document.querySelector('[data-tracking-updated-at]');
+
+                if (updatedAt && updatedLabel) {
+                    updatedLabel.textContent = `Pembaruan terakhir: ${updatedAt}`;
                 }
             })
             .catch(() => {});

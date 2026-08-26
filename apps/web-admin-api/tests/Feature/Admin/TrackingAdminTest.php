@@ -153,6 +153,8 @@ class TrackingAdminTest extends TestCase
             ->assertSee('data-feed-url=', false);
 
         $this->assertIsString($mapScript);
+        $this->assertStringContainsString('scrollWheelZoom: true', $mapScript);
+        $this->assertStringContainsString('Keep the administrator\'s chosen zoom', $mapScript);
         $this->assertStringNotContainsString('window.location.reload', $mapScript);
         $this->assertStringNotContainsString('location.reload', $mapScript);
     }

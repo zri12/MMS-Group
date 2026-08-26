@@ -198,6 +198,7 @@
                 <div class="border-b border-[var(--mms-color-border)] px-4 py-3">
                     <h2 class="text-[14px] font-semibold text-[var(--mms-color-text)]">Status PDL</h2>
                     <p class="mt-0.5 text-[11px] text-[var(--mms-color-text-subtle)]">Filter tanggal: {{ \Carbon\CarbonImmutable::parse($filters['date'])->format('d/m/Y') }}</p>
+                    <p data-tracking-updated-at class="mt-0.5 text-[11px] text-[var(--mms-color-text-subtle)]">Pembaruan otomatis setiap {{ $pollingSeconds }} detik</p>
                 </div>
 
                 @if ($rows->isEmpty())

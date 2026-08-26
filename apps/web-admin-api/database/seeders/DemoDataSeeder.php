@@ -44,6 +44,14 @@ class DemoDataSeeder extends Seeder
         $storting = [17_500_000, 16_000_000, 18_000_000, 15_500_000, 16_000_000, 15_500_000];
         $incoming = [8_000_000, 7_500_000, 8_500_000, 6_500_000, 7_000_000, 7_500_000];
         $outgoing = [5_000_000, 5_500_000, 4_000_000, 5_000_000, 5_000_000, 5_500_000];
+        $demoCoordinates = [
+            [-6.8722, 107.5422], // Cimahi Tengah
+            [-6.8925, 107.5343], // Cimahi Selatan
+            [-6.8586, 107.5464], // Cimahi Utara
+            [-6.8508, 107.4880], // Bandung Barat
+            [-6.8378, 107.4934], // Padalarang
+            [-6.8644, 107.5001], // Batujajar
+        ];
         $profiles = collect();
 
         foreach ($names as $index => $name) {
@@ -101,9 +109,11 @@ class DemoDataSeeder extends Seeder
                 'ended_at' => $index < 3 ? null : $today->setTime(15, 0), 'status' => $index < 3 ? TrackingStatus::Active : TrackingStatus::Offline,
                 'distance_meters' => 5400 + $index * 500, 'visit_count' => 2,
             ]);
+            [$baseLatitude, $baseLongitude] = $demoCoordinates[$index];
+
             foreach (range(0, 4) as $pointIndex) {
                 TrackingPoint::query()->updateOrCreate(['local_uuid' => sprintf('60000000-0000-4000-%04d-%012d', $index + 1, $pointIndex + 1)], [
-                    'tracking_session_id' => $session->id, 'latitude' => -6.8722 - ($index * .002) - ($pointIndex * .0003), 'longitude' => 107.5422 + ($index * .002) + ($pointIndex * .0003),
+                    'tracking_session_id' => $session->id, 'latitude' => $baseLatitude - ($pointIndex * .0003), 'longitude' => $baseLongitude + ($pointIndex * .0003),
                     'accuracy_meters' => 8, 'point_type' => $pointIndex === 0 ? TrackingPointType::Start : ($pointIndex === 4 ? TrackingPointType::Finish : TrackingPointType::Journey),
                     'recorded_at' => $today->setTime(8 + $pointIndex, 0), 'received_at' => $today->setTime(8 + $pointIndex, 0),
                 ]);
@@ -125,12 +135,28 @@ class DemoDataSeeder extends Seeder
 
     private function seedCurrentTrackingForMarketing(CarbonImmutable $today, DayName $day): void
     {
+        $coordinatesByArea = [
+            'Gedebage' => [-6.9563, 107.7046],
+            'Rancasari' => [-6.9454, 107.6762],
+            'Buahbatu' => [-6.9505, 107.6456],
+            'Ujungberung' => [-6.9113, 107.7139],
+            'Cibiru' => [-6.9408, 107.7242],
+            'Antapani' => [-6.9165, 107.6718],
+            'Kiaracondong' => [-6.9236, 107.6573],
+            'Cicaheum' => [-6.9024, 107.6761],
+            'Sukajadi' => [-6.8894, 107.5923],
+            'Lengkong' => [-6.9290, 107.6250],
+            'Arcamanik' => [-6.9102, 107.6846],
+            'Cimahi' => [-6.8722, 107.5422],
+            'Cileunyi' => [-6.9370, 107.7520],
+        ];
+
         MarketingProfile::query()
             ->whereHas('user', fn ($query) => $query->where('is_active', true))
             ->orderBy('code')
             ->get()
             ->values()
-            ->each(function (MarketingProfile $profile, int $index) use ($today, $day): void {
+            ->each(function (MarketingProfile $profile, int $index) use ($today, $day, $coordinatesByArea): void {
                 $session = TrackingSession::query()->updateOrCreate(
                     [
                         'marketing_profile_id' => $profile->id,
@@ -147,8 +173,9 @@ class DemoDataSeeder extends Seeder
                     ],
                 );
 
-                $latitude = -6.914744 + ($index * 0.006);
-                $longitude = 107.609810 + ($index * 0.007);
+                // These are area-centre placeholders only. GPS points from the
+                // marketing mobile app replace them as soon as the device reports.
+                [$latitude, $longitude] = $coordinatesByArea[$profile->area] ?? [-6.9175, 107.6191];
                 $recordedAt = $today->setTime(8, 20)->addMinutes($index * 5);
 
                 TrackingPoint::query()->updateOrCreate(
