@@ -101,7 +101,7 @@ class AppShell extends StatelessWidget {
     final screen = nav.current.screen;
     return switch (screen) {
       AppScreen.splash => SplashScreen(nav: nav, auth: auth),
-      AppScreen.login => LoginScreen(nav: nav, auth: auth),
+      AppScreen.login => LoginScreen(nav: nav, auth: auth, locationService: location),
       AppScreen.permLocation ||
       AppScreen.permBg ||
       AppScreen.permNotification ||
@@ -109,6 +109,7 @@ class AppShell extends StatelessWidget {
         nav: nav,
         screen: screen,
         service: location,
+        tracking: tracking,
       ),
       AppScreen.dashboard => DashboardScreen(
         nav: nav,

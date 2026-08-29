@@ -20,6 +20,15 @@ class TrackingDetailScreen extends StatefulWidget {
 class _TrackingDetailScreenState extends State<TrackingDetailScreen> {
   bool _refreshing = false;
 
+  Future<void> _start() async {
+    setState(() => _refreshing = true);
+    final started = await widget.tracking.ensureStarted();
+    if (!mounted) return;
+    setState(() => _refreshing = false);
+    if (started) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.tracking.startIssueMessage ?? 'Sesi tracking belum dapat dimulai.')));
+  }
+
   Future<void> _refresh() async {
     setState(() => _refreshing = true);
     await widget.tracking.refreshNow();
@@ -141,14 +150,14 @@ class _TrackingDetailScreenState extends State<TrackingDetailScreen> {
                     ),
                     const SizedBox(height: 20),
                     PrimaryButton(
-                      onPressed: _refresh,
+                      onPressed: active ? _refresh : _start,
                       loading: _refreshing,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(LucideIcons.refreshCw, size: 16, color: AppColors.primaryForeground),
+                        children: [
+                          Icon(active ? LucideIcons.refreshCw : LucideIcons.play, size: 16, color: AppColors.primaryForeground),
                           SizedBox(width: 8),
-                          Text('Perbarui Lokasi'),
+                          Text(active ? 'Perbarui Lokasi' : 'Mulai Tracking'),
                         ],
                       ),
                     ),

@@ -27,6 +27,13 @@ class _FakeLocationService extends LocationService {
       ph.PermissionStatus.granted;
 
   @override
+  Future<bool> requiresLocationOnboarding() async => true;
+
+  @override
+  Future<TrackingLocationStatus> trackingLocationStatus() async =>
+      TrackingLocationStatus.ready;
+
+  @override
   Future<Position> getCurrentPosition() async => Position(
     latitude: -6.9500,
     longitude: 107.6800,

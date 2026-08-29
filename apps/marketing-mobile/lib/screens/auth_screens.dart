@@ -5,6 +5,7 @@ import '../navigation/nav_controller.dart';
 import '../navigation/screen.dart';
 import '../services/location_service.dart';
 import '../state/auth_controller.dart';
+import '../state/tracking_controller.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primitives.dart';
 import '../widgets/buttons.dart';
@@ -106,7 +107,8 @@ class _BouncingDotsState extends State<_BouncingDots> with SingleTickerProviderS
 class LoginScreen extends StatefulWidget {
   final NavController nav;
   final AuthController auth;
-  const LoginScreen({super.key, required this.nav, required this.auth});
+  final LocationService locationService;
+  const LoginScreen({super.key, required this.nav, required this.auth, required this.locationService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -130,7 +132,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final ok = await widget.auth.login(_username.text.trim(), _password.text);
     if (!mounted) return;
     if (ok) {
-      widget.nav.navigate(AppScreen.permLocation);
+      final needsOnboarding = await widget.locationService.requiresLocationOnboarding();
+      if (!mounted) return;
+      widget.nav.resetTo(needsOnboarding ? AppScreen.permLocation : AppScreen.dashboard);
     } else {
       setState(() {}); // surface widget.auth.errorMessage below
     }
@@ -269,7 +273,8 @@ class PermissionScreen extends StatefulWidget {
   final NavController nav;
   final AppScreen screen;
   final LocationService? service;
-  const PermissionScreen({super.key, required this.nav, required this.screen, this.service});
+  final TrackingController? tracking;
+  const PermissionScreen({super.key, required this.nav, required this.screen, this.service, this.tracking});
 
   @override
   State<PermissionScreen> createState() => _PermissionScreenState();
@@ -292,6 +297,8 @@ class _PermissionScreenState extends State<PermissionScreen> {
     }
     if (!mounted) return;
     setState(() => _requesting = false);
+    if (cfg.next == AppScreen.dashboard) await widget.tracking?.ensureStarted();
+    if (!mounted) return;
     widget.nav.resetTo(cfg.next);
   }
 

@@ -77,6 +77,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _loadingSchedule = false;
   String? _scheduleError;
 
+  Future<void> _startTracking() async {
+    final started = await widget.tracking.ensureStarted();
+    if (!mounted || started) return;
+    final issue = widget.tracking.startIssueMessage ?? 'Sesi tracking belum dapat dimulai.';
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(issue),
+      action: widget.tracking.needsLocationSettings
+          ? SnackBarAction(label: 'PENGATURAN', onPressed: () { widget.tracking.openLocationSettings(); })
+          : null,
+    ));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -395,8 +407,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 10),
                         if (!active)
                           GestureDetector(
-                            onTap: () =>
-                                widget.nav.navigate(AppScreen.permLocation),
+                            onTap: _startTracking,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -407,7 +418,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Text(
-                                'Aktifkan Izin Lokasi',
+                                'Mulai Tracking',
                                 style: TextStyle(
                                   color: AppColors.primaryForeground,
                                   fontSize: 12,

@@ -7,6 +7,10 @@ import 'package:permission_handler/permission_handler.dart' as ph;
 /// `navigation/screen.dart`.
 enum AppPermissionKind { location, locationAlways, notification, camera }
 
+/// Non-interactive prerequisite state for a tracking session. Checking it
+/// never displays an Android permission dialog.
+enum TrackingLocationStatus { ready, serviceDisabled, permissionDenied }
+
 class LocationServiceException implements Exception {
   final String message;
   const LocationServiceException(this.message);
@@ -20,15 +24,39 @@ class LocationServiceException implements Exception {
 /// `LocationCard`'s consuming screens once those screens are unblocked by
 /// the Phase 0 Consumer/Prospect/Member decision.
 class LocationService {
-  Future<ph.PermissionStatus> requestPermission(AppPermissionKind kind) {
+  Future<ph.PermissionStatus> requestPermission(AppPermissionKind kind) async {
     final permission = switch (kind) {
       AppPermissionKind.location => ph.Permission.locationWhenInUse,
       AppPermissionKind.locationAlways => ph.Permission.locationAlways,
       AppPermissionKind.notification => ph.Permission.notification,
       AppPermissionKind.camera => ph.Permission.camera,
     };
+    final status = await permission.status;
+    if (status.isGranted || status.isLimited) return status;
     return permission.request();
   }
+
+  /// Do not repeat onboarding after a user has already granted location.
+  Future<bool> requiresLocationOnboarding() async {
+    final permission = await Geolocator.checkPermission();
+    return permission != LocationPermission.always &&
+        permission != LocationPermission.whileInUse;
+  }
+
+  Future<TrackingLocationStatus> trackingLocationStatus() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return TrackingLocationStatus.serviceDisabled;
+    }
+
+    final permission = await Geolocator.checkPermission();
+    return switch (permission) {
+      LocationPermission.always || LocationPermission.whileInUse =>
+        TrackingLocationStatus.ready,
+      _ => TrackingLocationStatus.permissionDenied,
+    };
+  }
+
+  Future<bool> openLocationSettings() => ph.openAppSettings();
 
   /// Real current GPS position. Throws [LocationServiceException] with a
   /// user-facing Indonesian message on failure (GPS disabled, permission
@@ -64,10 +92,7 @@ class LocationService {
       );
     }
 
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
+    final permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       throw const LocationServiceException(

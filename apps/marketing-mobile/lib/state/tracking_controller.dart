@@ -9,6 +9,8 @@ import '../data/local/sync_queue.dart';
 import '../services/location_service.dart';
 import '../services/tracking_service.dart';
 
+enum TrackingStartIssue { nonOperationalDay, locationServiceDisabled, locationPermissionDenied, serverUnavailable }
+
 /// Owns the field marketer's tracking-session lifecycle for the whole app
 /// run, per the product decision recorded in BACKEND_INTEGRATION_TASKS.md
 /// (2026-08-21): one continuous session per work day, started automatically
@@ -43,6 +45,15 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   TrackingSession? _session;
   TrackingSession? get session => _session;
   bool get isActive => _session != null;
+  TrackingStartIssue? _startIssue;
+  String? get startIssueMessage => switch (_startIssue) {
+    TrackingStartIssue.nonOperationalDay => 'Tracking hanya dapat dimulai pada hari operasional, Senin sampai Sabtu.',
+    TrackingStartIssue.locationServiceDisabled => 'GPS perangkat belum aktif. Aktifkan lokasi lalu mulai tracking lagi.',
+    TrackingStartIssue.locationPermissionDenied => 'Izin lokasi belum tersedia. Aktifkan izin Lokasi di pengaturan aplikasi.',
+    TrackingStartIssue.serverUnavailable => 'Sesi tracking belum dapat dimulai. Periksa koneksi ke server lalu coba lagi.',
+    null => null,
+  };
+  bool get needsLocationSettings => _startIssue == TrackingStartIssue.locationPermissionDenied;
 
   Position? _lastPosition;
   DateTime? _lastSampleAt;
@@ -73,13 +84,24 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
   /// on Sunday (the server rejects starts that day). Safe to call
   /// repeatedly — e.g. on every healthy `/health` tick — as a cheap retry
   /// if the initial attempt failed while offline.
-  Future<void> ensureStarted() async {
-    if (_starting) return;
+  Future<bool> ensureStarted() async {
+    if (_starting) return isActive;
     if (isActive) {
+      _startIssue = null;
       _resumeSampling();
-      return;
+      return true;
     }
-    if (DateTime.now().weekday == DateTime.sunday) return;
+    if (DateTime.now().weekday == DateTime.sunday) {
+      _startIssue = TrackingStartIssue.nonOperationalDay;
+      notifyListeners();
+      return false;
+    }
+    final locationStatus = await _locationService.trackingLocationStatus();
+    if (locationStatus != TrackingLocationStatus.ready) {
+      _startIssue = locationStatus == TrackingLocationStatus.serviceDisabled ? TrackingStartIssue.locationServiceDisabled : TrackingStartIssue.locationPermissionDenied;
+      notifyListeners();
+      return false;
+    }
     _starting = true;
     try {
       final current = await _service.current();
@@ -89,9 +111,14 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
             localUuid: newLocalUuid(),
             startedAt: DateTime.now(),
           );
+      _startIssue = null;
       notifyListeners();
       _resumeSampling();
+      return true;
     } on ApiException {
+      _startIssue = TrackingStartIssue.serverUnavailable;
+      notifyListeners();
+      return false;
       // Offline or a real server error at start time — silently retried on
       // the next call to ensureStarted() (main.dart wires this to the
       // periodic health-check tick).
@@ -102,6 +129,8 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Manual refresh (e.g. a "Perbarui Lokasi" button) — samples immediately
   /// instead of waiting for the next periodic tick.
+  Future<bool> openLocationSettings() => _locationService.openLocationSettings();
+
   Future<void> refreshNow() => _sample();
 
   void _resumeSampling() {

@@ -75,7 +75,7 @@ class MmsMarketingApp extends StatefulWidget {
   State<MmsMarketingApp> createState() => _MmsMarketingAppState();
 }
 
-class _MmsMarketingAppState extends State<MmsMarketingApp> {
+class _MmsMarketingAppState extends State<MmsMarketingApp> with WidgetsBindingObserver {
   final _nav = NavController();
   late final AuthController _auth = widget.authController ?? AuthController();
   late final LocationService _location = widget.locationService ?? LocationService();
@@ -95,6 +95,7 @@ class _MmsMarketingAppState extends State<MmsMarketingApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     // `DateFormat(pattern, 'id_ID')` (JourneyDetailScreen, TrackingHistoryScreen)
     // throws until this locale's symbol data is loaded — fire-and-forget
     // since the screens that format dates are only reached after
@@ -107,6 +108,13 @@ class _MmsMarketingAppState extends State<MmsMarketingApp> {
     _tracking.addListener(() => setState(() {}));
     _auth.bootstrap();
     _startHealthChecks();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _auth.isAuthenticated) {
+      unawaited(_tracking.ensureStarted());
+    }
   }
 
   /// Starts/stops the tracking session on auth transitions — covers both a
@@ -154,6 +162,7 @@ class _MmsMarketingAppState extends State<MmsMarketingApp> {
   @override
   void dispose() {
     _healthTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _nav.dispose();
     _auth.removeListener(_onAuthChanged);
     _auth.dispose();
