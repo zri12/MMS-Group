@@ -22,6 +22,23 @@ buat administrator pertama secara eksplisit:
 php artisan mms:provision-admin --name="Administrator MMS" --username=admin --email=admin@local.test --password="ganti-dengan-password-kuat"
 ```
 
+## Data Pengembangan Lokal
+
+Untuk mengisi database lokal dengan data pengujian yang mencakup PDL, prospek,
+anggota, jadwal, laporan operasional, rekap, dan tracking, jalankan perintah
+berikut dari PowerShell. Seeder ini hanya dapat berjalan pada environment
+`local` atau `testing` dan tidak dapat dijalankan pada production.
+
+```powershell
+$env:MMS_SEED_DEFAULT_PASSWORD = 'admin123'
+php artisan db:seed
+Remove-Item Env:MMS_SEED_DEFAULT_PASSWORD
+```
+
+Seeder tidak menghapus data yang telah ada; data dengan identitas yang sama
+akan diperbarui. Akun administrator lokal menggunakan username `admin` dan
+password yang diberikan pada `MMS_SEED_DEFAULT_PASSWORD`.
+
 ## Produksi cPanel
 
 Panduan dan generator paket unggah ada pada

@@ -18,6 +18,7 @@ use App\Models\Prospect;
 use App\Models\TrackingSession;
 use App\Models\User;
 use App\Models\VisitReport;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -161,6 +162,31 @@ class DashboardTest extends TestCase
             ->assertSee('Belum ada PDL')
             ->assertSee('Belum ada foto pencairan')
             ->assertSee('Belum ada foto bukti transfer');
+    }
+
+    public function test_dashboard_defaults_to_the_latest_operational_report_date(): void
+    {
+        CarbonImmutable::setTestNow('2026-07-26 10:00:00');
+
+        try {
+            $admin = User::factory()->admin()->create();
+            $marketing = $this->marketingProfile('M01');
+
+            DailyOperationalReport::factory()->create([
+                'marketing_profile_id' => $marketing->id,
+                'report_date' => '2026-07-25',
+                'day_name' => DayName::Saturday->value,
+                'total_target_amount' => 8000000,
+            ]);
+
+            $this->actingAs($admin)
+                ->get('/admin/dashboard')
+                ->assertOk()
+                ->assertSee('Sabtu, 25 Juli 2026')
+                ->assertSee('Rp 8.000.000');
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     private function marketingProfile(string $code): MarketingProfile

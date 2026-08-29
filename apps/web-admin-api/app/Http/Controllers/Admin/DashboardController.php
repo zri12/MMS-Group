@@ -25,7 +25,10 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        $selectedDate = CarbonImmutable::parse($request->string('date')->toString() ?: now(config('app.timezone'))->toDateString());
+        $requestedDate = $request->string('date')->toString();
+        $selectedDate = $requestedDate !== ''
+            ? CarbonImmutable::parse($requestedDate)
+            : $this->defaultSelectedDate();
         $selectedDay = DayName::tryFrom($request->string('day')->toString()) ?? $this->dayFromDate($selectedDate);
         $date = $selectedDate->toDateString();
 
@@ -127,5 +130,18 @@ class DashboardController extends Controller
             6 => DayName::Saturday,
             default => DayName::Monday,
         };
+    }
+
+    private function defaultSelectedDate(): CarbonImmutable
+    {
+        $latestReportDate = DailyOperationalReport::query()->max('report_date');
+
+        if (is_string($latestReportDate) && $latestReportDate !== '') {
+            return CarbonImmutable::parse($latestReportDate, config('app.timezone'));
+        }
+
+        $today = CarbonImmutable::now(config('app.timezone'))->startOfDay();
+
+        return $today->dayOfWeekIso === 7 ? $today->subDay() : $today;
     }
 }

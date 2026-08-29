@@ -185,4 +185,20 @@ return [
         )),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Development Seed
+    |--------------------------------------------------------------------------
+    |
+    | Nilai ini hanya dipakai oleh seeder local/testing. Seeder menolak
+    | environment production dan password tidak dicetak ke output.
+    |
+    */
+
+    'seed' => [
+        'admin_username' => env('MMS_SEED_ADMIN_USERNAME', 'admin'),
+        'admin_email' => env('MMS_SEED_ADMIN_EMAIL', 'admin@mms.local'),
+        'default_password' => env('MMS_SEED_DEFAULT_PASSWORD'),
+    ],
+
 ];

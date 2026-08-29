@@ -1,12 +1,17 @@
 [CmdletBinding()]
 param(
-    [string] $OutputDirectory = (Join-Path $PSScriptRoot "..\deployment-package")
+    [string] $OutputDirectory
 )
 
 $ErrorActionPreference = "Stop"
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $applicationRoot = Join-Path $repositoryRoot "apps\web-admin-api"
+
+if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+    $OutputDirectory = Join-Path $repositoryRoot "deployment-package"
+}
+
 $outputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 $outputPath = Join-Path $outputDirectory "mms-web-admin-cpanel.zip"
 $stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mms-web-admin-cpanel-" + [guid]::NewGuid())
