@@ -300,7 +300,14 @@ void main() {
 
     await tester.tap(find.text('Beranda'));
     await tester.pumpAndSettle();
-    expect(find.text('Tracking Aktif'), findsOneWidget);
+    expect(
+      find.text(
+        DateTime.now().weekday == DateTime.sunday
+            ? 'Tracking Tidak Aktif'
+            : 'Tracking Aktif',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Dashboard opens the operational-report form', (tester) async {
