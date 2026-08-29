@@ -24,21 +24,9 @@ php artisan mms:provision-admin --name="Administrator MMS" --username=admin --em
 
 ## Produksi cPanel
 
-1. Salin `.env.example` menjadi `.env`, lalu isi URL HTTPS, kredensial MySQL,
-   konfigurasi email, dan `APP_KEY` yang unik.
-2. Arahkan document root domain ke folder `public` aplikasi ini.
-3. Jalankan perintah berikut dari root aplikasi Laravel:
-
-```bash
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build
-php artisan migrate --force
-php artisan mms:provision-admin --name="Administrator MMS" --username=admin --email=admin@domain-anda.tld --password="password-kuat"
-php artisan storage:link
-php artisan optimize
-```
-
-4. Berikan izin tulis pada `storage` dan `bootstrap/cache`.
+Panduan dan generator paket unggah ada pada
+[`deploy/cpanel/README.md`](deploy/cpanel/README.md). Paket yang dihasilkan
+sudah mencakup aset produksi dan dependensi PHP tanpa `.env`.
 
 ## Verifikasi
 

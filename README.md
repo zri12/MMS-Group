@@ -34,15 +34,13 @@ alamat IP LAN komputer yang menjalankan Laravel.
 
 ## Deploy cPanel
 
-1. Arahkan document root domain ke `apps/web-admin-api/public`.
-2. Buat database dan user MySQL cPanel, lalu isi `apps/web-admin-api/.env`
-   berdasarkan `.env.example`; gunakan `APP_ENV=production`,
-   `APP_DEBUG=false`, dan URL HTTPS domain asli.
-3. Jalankan `composer install --no-dev --optimize-autoloader`,
-   `php artisan migrate --force`, `php artisan storage:link`,
-   `php artisan optimize`, serta `npm ci && npm run build`.
-4. Pastikan `storage` dan `bootstrap/cache` dapat ditulis oleh user web server.
-5. Buat APK rilis dengan domain HTTPS:
+1. Jalankan `./scripts/create-cpanel-package.ps1` dari root repository.
+2. Upload `deployment-package/mms-web-admin-cpanel.zip` ke home directory
+   cPanel, lalu extract di luar `public_html`.
+3. Ikuti panduan lengkap di
+   [`apps/web-admin-api/deploy/cpanel/README.md`](apps/web-admin-api/deploy/cpanel/README.md)
+   untuk document root, MySQL, `.env`, migration, storage link, dan admin awal.
+4. Buat APK rilis dengan domain HTTPS:
 
 ```powershell
 flutter build apk --release --dart-define=API_BASE_URL=https://domain-anda/api/v1
