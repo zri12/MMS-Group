@@ -112,6 +112,36 @@ class TrackingAdminTest extends TestCase
             ->assertJsonPath('data.markers.0.lng', 107.7079);
     }
 
+    public function test_tracking_defaults_to_the_latest_session_date(): void
+    {
+        CarbonImmutable::setTestNow('2026-07-26 09:00:00');
+
+        try {
+            $admin = User::factory()->admin()->create();
+            $marketing = $this->marketingProfile('M01');
+            $session = TrackingSession::factory()->create([
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-07-25',
+                'day_name' => DayName::Saturday->value,
+                'status' => TrackingStatus::Offline->value,
+            ]);
+            TrackingPoint::factory()->create([
+                'tracking_session_id' => $session->id,
+                'latitude' => -6.9388,
+                'longitude' => 107.7079,
+                'recorded_at' => '2026-07-25 08:30:00',
+            ]);
+
+            $this->actingAs($admin)
+                ->get('/admin/tracking')
+                ->assertOk()
+                ->assertSee('value="2026-07-25"', false)
+                ->assertSee('data-markers="[{&quot;lat&quot;:-6.9388', false);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
     public function test_live_tracking_marks_stale_gps_as_inactive(): void
     {
         CarbonImmutable::setTestNow('2026-07-20 09:00:00');

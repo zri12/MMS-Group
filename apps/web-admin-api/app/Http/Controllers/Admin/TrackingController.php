@@ -107,6 +107,12 @@ class TrackingController extends Controller
             return CarbonImmutable::createFromFormat('!Y-m-d', $date);
         }
 
+        $latestSessionDate = TrackingSession::query()->max('session_date');
+
+        if (is_string($latestSessionDate) && $latestSessionDate !== '') {
+            return CarbonImmutable::parse($latestSessionDate, config('mms.timezone'));
+        }
+
         return CarbonImmutable::now(config('mms.timezone'))->startOfDay();
     }
 
