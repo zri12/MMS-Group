@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../navigation/nav_controller.dart';
+import '../navigation/screen.dart';
 import '../state/tracking_controller.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primitives.dart';
@@ -164,7 +165,7 @@ class _TrackingDetailScreenState extends State<TrackingDetailScreen> {
                     if (offline) ...[
                       const SizedBox(height: 10),
                       SecondaryButton(
-                        onPressed: () {},
+                        onPressed: () => widget.nav.navigate(AppScreen.syncStatus),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
