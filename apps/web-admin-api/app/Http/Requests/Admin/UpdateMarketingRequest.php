@@ -46,7 +46,7 @@ class UpdateMarketingRequest extends FormRequest
             'area' => ['required', 'string', 'max:100'],
             'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('mms.uploads.max_image_kb', 2048)],
             'work_days' => ['required', 'array', 'min:1'],
-            'work_days.*' => ['required', 'string', 'distinct', Rule::in(DayName::values())],
+            'work_days.*' => ['required', 'string', 'distinct', Rule::in(DayName::operationalValues())],
         ];
     }
 

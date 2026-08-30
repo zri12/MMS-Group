@@ -29,7 +29,7 @@ class OperationalRecapController extends Controller
 
         return view('admin.operational-recaps.index', [
             'recaps' => $recaps,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'filters' => [
                 'day' => $request->string('day')->toString(),
                 'date' => $request->string('date')->toString(),

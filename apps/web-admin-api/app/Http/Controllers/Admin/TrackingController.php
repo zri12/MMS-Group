@@ -34,7 +34,7 @@ class TrackingController extends Controller
             'profiles' => $profiles,
             'rows' => $rows,
             'markers' => $markers,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'statuses' => TrackingStatus::options(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'pollingSeconds' => config('mms.tracking.polling_seconds', 30),

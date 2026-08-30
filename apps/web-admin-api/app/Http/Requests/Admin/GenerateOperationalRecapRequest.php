@@ -29,7 +29,7 @@ class GenerateOperationalRecapRequest extends FormRequest
         $validator->after(function ($validator): void {
             $date = CarbonImmutable::createFromFormat('!Y-m-d', (string) $this->input('recap_date'));
 
-            if ($date && $date->isSunday()) {
+            if ($date && $date->isSunday() && ! config('mms.testing.allow_sunday_operations', false)) {
                 $validator->errors()->add('recap_date', 'Rekap hanya dapat dibuat pada hari operasional.');
             }
         });

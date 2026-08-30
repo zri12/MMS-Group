@@ -19,6 +19,10 @@ enum TrackingStartIssue { nonOperationalDay, locationServiceDisabled, locationPe
 /// requested location-always permission. Android keeps tracking visible
 /// through a foreground notification while the session remains active.
 class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
+  static const _allowSundayTracking = bool.fromEnvironment(
+    'ALLOW_SUNDAY_TRACKING',
+  );
+
   TrackingController({
     TrackingService? service,
     LocationService? locationService,
@@ -91,7 +95,7 @@ class TrackingController extends ChangeNotifier with WidgetsBindingObserver {
       _resumeSampling();
       return true;
     }
-    if (DateTime.now().weekday == DateTime.sunday) {
+    if (DateTime.now().weekday == DateTime.sunday && !_allowSundayTracking) {
       _startIssue = TrackingStartIssue.nonOperationalDay;
       notifyListeners();
       return false;

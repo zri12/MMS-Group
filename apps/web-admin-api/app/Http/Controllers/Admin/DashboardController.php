@@ -128,7 +128,9 @@ class DashboardController extends Controller
             4 => DayName::Thursday,
             5 => DayName::Friday,
             6 => DayName::Saturday,
-            default => DayName::Monday,
+            default => config('mms.testing.allow_sunday_operations', false)
+                ? DayName::Sunday
+                : DayName::Monday,
         };
     }
 

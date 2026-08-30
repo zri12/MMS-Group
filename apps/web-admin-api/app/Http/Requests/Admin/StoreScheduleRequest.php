@@ -38,7 +38,7 @@ class StoreScheduleRequest extends FormRequest
         return [
             'marketing_profile_id' => ['required', 'integer', 'exists:marketing_profiles,id'],
             'prospect_id' => ['nullable', 'integer', Rule::exists('prospects', 'id')],
-            'day_name' => ['required', 'string', Rule::in(DayName::values())],
+            'day_name' => ['required', 'string', Rule::in(DayName::operationalValues())],
             'schedule_date' => ['required', 'date'],
             'start_time' => ['required', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],

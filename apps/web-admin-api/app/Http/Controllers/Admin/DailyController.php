@@ -58,7 +58,7 @@ class DailyController extends Controller
         $photoResolver = fn (MarketingProfile $p): string => ProfilePhoto::marketing($p);
 
         return view('admin.daily.index', [
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'selectedDay' => $selectedDay,
             'selectedDate' => $date,
             'filters' => [
@@ -87,6 +87,7 @@ class DailyController extends Controller
             DayName::Thursday => $today->startOfWeek()->addDays(3),
             DayName::Friday => $today->startOfWeek()->addDays(4),
             DayName::Saturday => $today->startOfWeek()->addDays(5),
+            DayName::Sunday => $today->startOfWeek()->addDays(6),
         };
     }
 }

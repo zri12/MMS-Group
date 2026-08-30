@@ -45,7 +45,7 @@ class OperationalReportController extends Controller
 
         return view('admin.operational-reports.index', [
             'reports' => $reports,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'syncStatuses' => SyncStatus::options(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'resorts' => DailyOperationalReport::query()->distinct()->orderBy('resort')->pluck('resort'),

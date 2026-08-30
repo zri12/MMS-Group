@@ -22,7 +22,7 @@ class ScheduleIndexRequest extends ApiFormRequest
     {
         return [
             'date' => ['nullable', 'date_format:Y-m-d'],
-            'day' => ['nullable', 'string', Rule::in(DayName::values())],
+            'day' => ['nullable', 'string', Rule::in(DayName::operationalValues())],
             'status' => ['nullable', 'string', Rule::in(ScheduleStatus::values())],
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:'.config('mms.pagination.max_per_page', 100)],

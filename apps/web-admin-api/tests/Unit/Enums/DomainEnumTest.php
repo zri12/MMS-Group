@@ -55,7 +55,7 @@ class DomainEnumTest extends TestCase
             ],
             'day_name' => [
                 DayName::class,
-                ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
                 [
                     'Senin' => 'Senin',
                     'Selasa' => 'Selasa',
@@ -63,6 +63,7 @@ class DomainEnumTest extends TestCase
                     'Kamis' => 'Kamis',
                     'Jumat' => 'Jumat',
                     'Sabtu' => 'Sabtu',
+                    'Minggu' => 'Minggu',
                 ],
             ],
             'member_approval_status' => [

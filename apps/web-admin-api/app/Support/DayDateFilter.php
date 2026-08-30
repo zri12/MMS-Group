@@ -19,6 +19,7 @@ final class DayDateFilter
             DayName::Thursday => 4,
             DayName::Friday => 5,
             DayName::Saturday => 6,
+            DayName::Sunday => 7,
         };
 
         if (DB::connection()->getDriverName() === 'sqlite') {

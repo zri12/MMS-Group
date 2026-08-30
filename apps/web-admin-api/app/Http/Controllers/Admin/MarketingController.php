@@ -63,7 +63,7 @@ class MarketingController extends Controller
 
         return view('admin.marketing.index', [
             'profiles' => $profiles,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'areas' => MarketingProfile::query()->distinct()->orderBy('area')->pluck('area'),
             'filters' => [
                 'search' => $request->string('search')->toString(),
@@ -80,7 +80,7 @@ class MarketingController extends Controller
     public function create(): View
     {
         return view('admin.marketing.create', [
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
         ]);
     }
 
@@ -198,7 +198,7 @@ class MarketingController extends Controller
 
         return view('admin.marketing.edit', [
             'marketing' => $marketing,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
         ]);
     }
 

@@ -12,6 +12,7 @@ enum DayName: string
     case Thursday = 'Kamis';
     case Friday = 'Jumat';
     case Saturday = 'Sabtu';
+    case Sunday = 'Minggu';
 
     public function label(): string
     {
@@ -22,6 +23,7 @@ enum DayName: string
             self::Thursday => 'Kamis',
             self::Friday => 'Jumat',
             self::Saturday => 'Sabtu',
+            self::Sunday => 'Minggu',
         };
     }
 
@@ -34,6 +36,14 @@ enum DayName: string
     }
 
     /**
+     * @return list<string>
+     */
+    public static function operationalValues(): array
+    {
+        return array_column(self::operationalCases(), 'value');
+    }
+
+    /**
      * @return array<string, string>
      */
     public static function options(): array
@@ -43,5 +53,28 @@ enum DayName: string
             static fn (array $options, self $case): array => $options + [$case->value => $case->label()],
             [],
         );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function operationalOptions(): array
+    {
+        return array_reduce(
+            self::operationalCases(),
+            static fn (array $options, self $case): array => $options + [$case->value => $case->label()],
+            [],
+        );
+    }
+
+    /**
+     * @return list<self>
+     */
+    private static function operationalCases(): array
+    {
+        return array_values(array_filter(
+            self::cases(),
+            static fn (self $day): bool => $day !== self::Sunday || config('mms.testing.allow_sunday_operations', false),
+        ));
     }
 }

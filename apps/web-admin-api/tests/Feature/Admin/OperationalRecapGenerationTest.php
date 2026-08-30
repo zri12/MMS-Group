@@ -19,6 +19,13 @@ class OperationalRecapGenerationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        config(['mms.testing.allow_sunday_operations' => false]);
+
+        parent::tearDown();
+    }
+
     public function test_admin_can_generate_an_all_marketing_recap_from_operational_reports(): void
     {
         $admin = User::factory()->admin()->create(['name' => 'Admin Rekap']);
@@ -106,6 +113,7 @@ class OperationalRecapGenerationTest extends TestCase
 
     public function test_recap_generation_rejects_sunday(): void
     {
+        config(['mms.testing.allow_sunday_operations' => false]);
         $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
@@ -113,5 +121,20 @@ class OperationalRecapGenerationTest extends TestCase
             ->post(route('admin.operational-recaps.generate'), ['recap_date' => '2026-07-19'])
             ->assertRedirect(route('admin.operational-recaps.index'))
             ->assertSessionHasErrors('recap_date');
+    }
+
+    public function test_recap_generation_allows_sunday_when_test_mode_is_enabled(): void
+    {
+        config(['mms.testing.allow_sunday_operations' => true]);
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->post(route('admin.operational-recaps.generate'), ['recap_date' => '2026-08-30'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('operational_recaps', [
+            'recap_date' => '2026-08-30 00:00:00',
+            'day_name' => DayName::Sunday->value,
+        ]);
     }
 }

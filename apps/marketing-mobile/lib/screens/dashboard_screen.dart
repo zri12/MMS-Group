@@ -13,7 +13,16 @@ import '../widgets/primitives.dart';
 import '../widgets/status.dart';
 import '../widgets/buttons.dart';
 
-const _days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const _allowSundayOperations = bool.fromEnvironment('ALLOW_SUNDAY_TRACKING');
+const _days = [
+  'Senin',
+  'Selasa',
+  'Rabu',
+  'Kamis',
+  'Jumat',
+  'Sabtu',
+  if (_allowSundayOperations) 'Minggu',
+];
 const _dayWeekdayIndex = {
   'Senin': 1,
   'Selasa': 2,
@@ -21,12 +30,13 @@ const _dayWeekdayIndex = {
   'Kamis': 4,
   'Jumat': 5,
   'Sabtu': 6,
+  if (_allowSundayOperations) 'Minggu': 7,
 };
 
 String _todayDayName() {
   final weekday = DateTime.now().weekday; // 1=Senin..7=Minggu
   if (weekday >= 1 && weekday <= 6) return _days[weekday - 1];
-  return _days.first; // Sunday: the picker has no 7th day, fall back to Senin.
+  return _allowSundayOperations ? 'Minggu' : _days.first;
 }
 
 String _isoDate(DateTime d) =>

@@ -31,7 +31,7 @@ class JourneyController extends Controller
 
         return view('admin.journeys.index', [
             'sessions' => $sessions,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'statuses' => TrackingStatus::options(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'filters' => [

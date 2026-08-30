@@ -49,7 +49,7 @@ class ProspectController extends Controller
         return view('admin.prospects.index', [
             'prospects' => $prospects,
             'statuses' => ProspectStatus::options(),
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'resorts' => Prospect::query()->distinct()->orderBy('resort')->pluck('resort'),
             'filters' => [

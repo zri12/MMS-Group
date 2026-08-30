@@ -52,7 +52,7 @@ class MemberController extends Controller
         return view('admin.members.index', [
             'members' => $members,
             'statuses' => MemberApprovalStatus::options(),
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'resorts' => Member::query()->distinct()->orderBy('resort')->pluck('resort'),
             'filters' => [

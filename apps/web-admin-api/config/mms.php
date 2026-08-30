@@ -60,6 +60,10 @@ return [
         'Sabtu',
     ],
 
+    'testing' => [
+        'allow_sunday_operations' => (bool) env('MMS_ALLOW_SUNDAY_OPERATIONS', false),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Upload

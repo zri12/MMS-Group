@@ -24,7 +24,7 @@ class StoreOperationalReportRequest extends ApiFormRequest
             'local_uuid' => ['required', 'uuid'],
             'date' => ['required', 'date_format:Y-m-d'],
             'time' => ['required', 'date_format:H:i:s'],
-            'day' => ['required', 'string', Rule::in(DayName::values())],
+            'day' => ['required', 'string', Rule::in(DayName::operationalValues())],
             'resort' => ['required', 'string', 'max:100'],
             'storting' => ['required', 'integer', 'min:0'],
             'insurance_amount' => ['required', 'integer', 'min:0'],

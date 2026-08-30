@@ -32,7 +32,7 @@ class StoreVisitReportRequest extends ApiFormRequest
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:'.config('mms.uploads.max_image_kb', 2048)],
             'photo_caption' => ['nullable', 'string', 'max:255'],
             'resort' => ['required', 'string', 'max:100'],
-            'day' => ['required', 'string', Rule::in(DayName::values())],
+            'day' => ['required', 'string', Rule::in(DayName::operationalValues())],
             'date' => ['required', 'date_format:Y-m-d'],
             'time' => ['required', 'date_format:H:i:s'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],

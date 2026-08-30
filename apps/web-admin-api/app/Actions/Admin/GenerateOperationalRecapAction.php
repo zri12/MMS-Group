@@ -171,6 +171,7 @@ class GenerateOperationalRecapAction
             4 => DayName::Thursday,
             5 => DayName::Friday,
             6 => DayName::Saturday,
+            7 => DayName::Sunday,
         };
     }
 

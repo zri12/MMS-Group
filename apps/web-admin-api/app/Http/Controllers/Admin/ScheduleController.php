@@ -47,7 +47,7 @@ class ScheduleController extends Controller
 
         return view('admin.schedules.index', [
             'schedules' => $schedules,
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'statuses' => ScheduleStatus::options(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'filters' => [
@@ -108,7 +108,7 @@ class ScheduleController extends Controller
     private function formData(): array
     {
         return [
-            'days' => DayName::options(),
+            'days' => DayName::operationalOptions(),
             'statuses' => ScheduleStatus::options(),
             'marketingOptions' => MarketingProfile::query()->with('user')->orderBy('code')->get(),
             'prospects' => Prospect::query()->with('marketingProfile.user')->orderBy('name')->get(),

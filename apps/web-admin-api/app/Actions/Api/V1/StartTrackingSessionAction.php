@@ -97,6 +97,11 @@ class StartTrackingSessionAction
             4 => DayName::Thursday,
             5 => DayName::Friday,
             6 => DayName::Saturday,
+            7 => config('mms.testing.allow_sunday_operations', false)
+                ? DayName::Sunday
+                : throw ValidationException::withMessages([
+                    'started_at' => 'Tanggal tracking harus berada pada hari operasional.',
+                ]),
             default => throw ValidationException::withMessages([
                 'started_at' => 'Tanggal tracking harus berada pada hari operasional.',
             ]),

@@ -27,6 +27,7 @@
         <env name="FILESYSTEM_DISK" value="public"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="MMS_SEED_DEFAULT_PASSWORD" value="MmsTestingOnly123!"/>
+        <env name="MMS_ALLOW_SUNDAY_OPERATIONS" value="false" force="true"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

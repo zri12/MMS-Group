@@ -20,6 +20,13 @@ class MarketingTrackingTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function tearDown(): void
+    {
+        config(['mms.testing.allow_sunday_operations' => false]);
+
+        parent::tearDown();
+    }
+
     public function test_marketing_can_start_tracking_idempotently_and_read_current_session(): void
     {
         [$marketing, $token] = $this->marketingToken('M01');
@@ -49,6 +56,24 @@ class MarketingTrackingTest extends TestCase
             ->getJson('/api/v1/tracking/sessions/current')
             ->assertOk()
             ->assertJsonPath('data.id', $first->json('data.session_id'));
+    }
+
+    public function test_marketing_can_start_tracking_on_sunday_when_test_mode_is_enabled(): void
+    {
+        config(['mms.testing.allow_sunday_operations' => true]);
+        [$marketing, $token] = $this->marketingToken('M01');
+
+        $this->withToken($token)
+            ->postJson('/api/v1/tracking/sessions/start', [
+                'local_uuid' => (string) Str::uuid(),
+                'started_at' => '2026-08-30T08:05:00+07:00',
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('tracking_sessions', [
+            'marketing_profile_id' => $marketing->id,
+            'day_name' => DayName::Sunday->value,
+        ]);
     }
 
     public function test_marketing_can_store_tracking_points_idempotently(): void
