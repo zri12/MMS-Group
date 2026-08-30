@@ -107,6 +107,8 @@ function initializeTrackingMap(element) {
         scrollWheelZoom: true,
     }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
+    map.attributionControl.setPrefix(false);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
