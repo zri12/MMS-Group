@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(milliseconds: 2000), () {
+    Timer(const Duration(milliseconds: 2800), () {
       if (!mounted) return;
       // A stored token was already re-validated against /auth/profile by
       // AuthController.bootstrap() (called at app startup) — if it's still
@@ -55,6 +55,18 @@ class _SplashScreenState extends State<SplashScreen> {
             Container(width: 32, height: 1, color: AppColors.border),
             const Spacer(),
             const _BouncingDots(),
+            const SizedBox(height: 12),
+            const SizedBox(
+              width: 152,
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(999)),
+                child: LinearProgressIndicator(
+                  minHeight: 3,
+                  color: AppColors.gold,
+                  backgroundColor: AppColors.border,
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
             const Text('v1.0.0', style: TextStyle(color: AppColors.disabled, fontSize: 11)),
             const SizedBox(height: 24),

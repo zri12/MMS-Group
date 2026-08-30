@@ -70,7 +70,7 @@ const _screenTabMap = <AppScreen, AppScreen>{
   AppScreen.about: AppScreen.profile,
 };
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   final NavController nav;
   final AuthController auth;
   final LocationService location;
@@ -96,6 +96,97 @@ class AppShell extends StatelessWidget {
     this.scheduleService,
     this.trackingService,
   });
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  final Map<AppScreen, Widget> _cachedTabScreens = {};
+  int? _cachedUserId;
+
+  NavController get nav => widget.nav;
+  AuthController get auth => widget.auth;
+  LocationService get location => widget.location;
+  TrackingController get tracking => widget.tracking;
+  ProspectService? get prospectService => widget.prospectService;
+  MemberService? get memberService => widget.memberService;
+  VisitReportService? get visitReportService => widget.visitReportService;
+  OperationalReportService? get operationalReportService =>
+      widget.operationalReportService;
+  PhotoService? get photoService => widget.photoService;
+  ScheduleService? get scheduleService => widget.scheduleService;
+  TrackingService? get trackingService => widget.trackingService;
+
+  Widget _createTabScreen(AppScreen screen) => switch (screen) {
+    AppScreen.dashboard => DashboardScreen(
+      nav: nav,
+      auth: auth,
+      tracking: tracking,
+      operationalReportService: operationalReportService,
+      memberService: memberService,
+      scheduleService: scheduleService,
+    ),
+    AppScreen.consumers => ConsumersScreen(
+      nav: nav,
+      service: prospectService,
+      memberService: memberService,
+    ),
+    AppScreen.reports => ReportsScreen(nav: nav, service: visitReportService),
+    AppScreen.history => HistoryScreen(
+      nav: nav,
+      auth: auth,
+      tracking: tracking,
+    ),
+    AppScreen.profile => ProfileScreen(nav: nav, auth: auth),
+    _ => throw ArgumentError.value(screen, 'screen', 'Bukan tab utama'),
+  };
+
+  Widget _tabStack(AppScreen? activeScreen) {
+    if (activeScreen != null) {
+      _cachedTabScreens.putIfAbsent(
+        activeScreen,
+        () => _createTabScreen(activeScreen),
+      );
+    }
+
+    if (_cachedTabScreens.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: _cachedTabScreens.entries.map((entry) {
+        final isActive = entry.key == activeScreen;
+        return Offstage(
+          offstage: !isActive,
+          child: TickerMode(enabled: isActive, child: entry.value),
+        );
+      }).toList(growable: false),
+    );
+  }
+
+  Widget _renderBody() {
+    final screen = nav.current.screen;
+    final isRootTab = _navTabs.any((tab) => tab.screen == screen);
+
+    if (isRootTab) {
+      return _tabStack(screen);
+    }
+
+    if (authScreens.contains(screen)) {
+      return _renderScreen();
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (_cachedTabScreens.isNotEmpty)
+          Offstage(offstage: true, child: _tabStack(null)),
+        _renderScreen(),
+      ],
+    );
+  }
 
   Widget _renderScreen() {
     final screen = nav.current.screen;
@@ -202,6 +293,12 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = auth.user?.id;
+    if (_cachedUserId != userId) {
+      _cachedTabScreens.clear();
+      _cachedUserId = userId;
+    }
+
     final isAuth = authScreens.contains(nav.current.screen);
     final activeTab = _screenTabMap[nav.current.screen] ?? AppScreen.dashboard;
 
@@ -210,7 +307,7 @@ class AppShell extends StatelessWidget {
       body: Column(
         children: [
           if (!isAuth) OfflineBanner(offline: nav.offline),
-          Expanded(child: _renderScreen()),
+          Expanded(child: _renderBody()),
         ],
       ),
       bottomNavigationBar: isAuth ? null : _buildBottomNav(activeTab),

@@ -38,9 +38,9 @@ void main() {
 
     expect(find.text('KSP Manunggal Makmur Sejahtera'), findsOneWidget);
 
-    // Consume the splash screen's 2000ms auto-navigate timer so it doesn't
+    // Consume the splash screen's 2800ms auto-navigate timer so it doesn't
     // leak past the test body (flutter_test asserts no pending timers).
-    await tester.pump(const Duration(milliseconds: 2100));
+    await tester.pump(const Duration(milliseconds: 2900));
 
     expect(find.text('Selamat Datang'), findsOneWidget);
   });

@@ -241,7 +241,7 @@ Future<void> _login(WidgetTester tester) async {
     ),
   );
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 2100));
+  await tester.pump(const Duration(milliseconds: 2900));
   expect(find.text('Selamat Datang'), findsOneWidget);
   await tester.enterText(find.byType(TextField).at(0), 'm01.budi');
   await tester.pump();

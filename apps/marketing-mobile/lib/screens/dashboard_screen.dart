@@ -78,13 +78,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String selectedDay = _todayDayName();
 
-  bool _loadingSummary = true;
   List<OperationalReport> _todayReports = const [];
   List<OperationalReport> _selectedReports = const [];
   int _totalAnggota = 0;
 
   final Map<String, List<Schedule>> _scheduleCache = {};
-  bool _loadingSchedule = false;
   String? _scheduleError;
 
   Future<void> _startTracking() async {
@@ -114,10 +112,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   /// day-picker's selected day's report) — no separate endpoint per
   /// section needed.
   Future<void> _loadSummary() async {
-    setState(() => _loadingSummary = true);
+    final requestedDay = selectedDay;
     try {
       final today = DateTime.now();
-      final selectedDate = _dateForDay(selectedDay);
+      final selectedDate = _dateForDay(requestedDay);
       final todayReports = await _reportService.list(
         dateFrom: _isoDate(today),
         dateTo: _isoDate(today),
@@ -134,33 +132,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (!mounted) return;
       setState(() {
         _todayReports = todayReports;
-        _selectedReports = selectedReports;
+        if (selectedDay == requestedDay) {
+          _selectedReports = selectedReports;
+        }
         _totalAnggota = members;
-        _loadingSummary = false;
       });
     } catch (_) {
-      if (!mounted) return;
-      setState(() => _loadingSummary = false);
+      // Keep the latest successful values visible when a refresh fails.
     }
   }
 
   Future<void> _loadSchedule(String day) async {
     if (_scheduleCache.containsKey(day)) return;
-    setState(() {
-      _loadingSchedule = true;
-      _scheduleError = null;
-    });
+    setState(() => _scheduleError = null);
     try {
       final list = await _scheduleService.list(day: day);
       if (!mounted) return;
       setState(() {
         _scheduleCache[day] = list;
-        _loadingSchedule = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _loadingSchedule = false;
         _scheduleError = 'Gagal memuat jadwal.';
       });
     }
@@ -514,15 +507,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _summaryLoading() => const Padding(
-    padding: EdgeInsets.symmetric(vertical: 16),
-    child: Center(
-      child: CircularProgressIndicator(color: AppColors.gold, strokeWidth: 2),
-    ),
-  );
-
   Widget _buildRingkasanHariIni() {
-    if (_loadingSummary) return _summaryLoading();
     final resort = widget.auth.user?.marketing?.area ?? '-';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -575,7 +560,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildRingkasanOperasional() {
-    if (_loadingSummary) return _summaryLoading();
     final keluar = _reportTotal(
       _selectedReports,
       (r) => r.outgoingTargetAmount,
@@ -690,7 +674,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             final active = d == selectedDay;
             return GestureDetector(
               onTap: () {
-                setState(() => selectedDay = d);
+                if (active) return;
+                setState(() {
+                  selectedDay = d;
+                  _selectedReports = const [];
+                });
                 _loadSchedule(d);
                 _loadSummary();
               },
@@ -741,17 +729,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        if (_loadingSchedule)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: CircularProgressIndicator(
-                color: AppColors.gold,
-                strokeWidth: 2,
-              ),
-            ),
-          )
-        else if (_scheduleError != null)
+        if (_scheduleError != null)
           Text(
             _scheduleError!,
             style: const TextStyle(color: AppColors.badgeRedText, fontSize: 12),
