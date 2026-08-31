@@ -10,7 +10,22 @@ $error = null;
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $message = cpanel_setup_run('storage:link');
+        $target = cpanel_setup_base_path().'/storage/app/public';
+        $link = __DIR__.'/storage';
+
+        if (! is_dir($target)) {
+            throw new RuntimeException('Folder storage aplikasi tidak ditemukan.');
+        }
+
+        if (is_link($link)) {
+            $message = 'Storage link sudah tersedia.';
+        } elseif (file_exists($link)) {
+            throw new RuntimeException('public/storage sudah ada dan bukan symbolic link. Hapus folder tersebut melalui File Manager lalu coba kembali.');
+        } elseif (! symlink($target, $link)) {
+            throw new RuntimeException('Hosting menolak pembuatan symbolic link. Hubungi provider hosting untuk mengaktifkan symlink.');
+        } else {
+            $message = 'Storage link berhasil dibuat.';
+        }
     }
 } catch (Throwable $exception) {
     $error = $exception->getMessage();

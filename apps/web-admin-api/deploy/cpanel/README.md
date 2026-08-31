@@ -103,3 +103,26 @@ Jika hosting tidak mengizinkan document root mengarah ke folder `public`,
 gunakan subdomain/addon domain yang mengizinkannya atau minta provider hosting
 mengubah document root. Jangan menyalin `public/index.php` ke root proyek
 Laravel karena berisiko mengekspos file konfigurasi.
+
+## Layout Public Terpisah
+
+Gunakan layout ini bila cPanel tidak dapat mengubah document root domain:
+
+```text
+/home/fazriluk/PROJECT MESS MONITORING
+/home/fazriluk/public_html/demoprojectweb.net
+```
+
+Ekstrak `mms-web-admin-cpanel.zip`, lalu ubah nama folder hasil ekstrak menjadi
+`PROJECT MESS MONITORING`. Setelah itu, dari komputer pengembangan jalankan:
+
+```powershell
+.\scripts\create-cpanel-public-package.ps1
+```
+
+Upload dan ekstrak `deployment-package/demoprojectweb.net-public.zip` ke
+`/home/fazriluk/public_html/demoprojectweb.net`. ZIP ini memiliki `index.php`
+dan halaman setup yang sudah diarahkan ke folder proyek di atas. Jangan
+menggunakan ZIP public tersebut untuk domain atau nama folder proyek lain;
+buat ulang paket dengan parameter `-ProjectPath` dan `-DocumentRoot` yang
+sesuai.
