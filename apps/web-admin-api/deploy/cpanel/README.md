@@ -104,6 +104,31 @@ gunakan subdomain/addon domain yang mengizinkannya atau minta provider hosting
 mengubah document root. Jangan menyalin `public/index.php` ke root proyek
 Laravel karena berisiko mengekspos file konfigurasi.
 
+## Struktur public terpisah
+
+Untuk struktur cPanel berikut:
+
+```text
+/home/fazriluk/PROJECT MMS WEB ADMIN
+/home/fazriluk/public_html/demoprojectweb.net
+```
+
+buat ZIP publik khusus dari root repository:
+
+```powershell
+.\scripts\create-cpanel-public-package.ps1
+```
+
+Hasilnya `deployment-package/demoprojectweb.net-public.zip`. Upload ZIP ini ke
+`/home/fazriluk/public_html`, lalu extract sehingga folder hasilnya menjadi
+`/home/fazriluk/public_html/demoprojectweb.net`. ZIP tersebut hanya berisi file
+yang boleh diakses web dan `index.php` di dalamnya sudah menunjuk ke
+`/home/fazriluk/PROJECT MMS WEB ADMIN`.
+
+Upload juga paket aplikasi Laravel ke `/home/fazriluk`, lalu pastikan nama
+folder aplikasi adalah tepat `PROJECT MMS WEB ADMIN`. Jangan extract ZIP publik
+ke dalam folder aplikasi Laravel.
+
 ## Layout Public Terpisah
 
 Gunakan layout ini bila cPanel tidak dapat mengubah document root domain:

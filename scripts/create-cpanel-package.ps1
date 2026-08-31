@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
-    [string] $OutputDirectory
+    [string] $OutputDirectory,
+    [string] $ApplicationDirectoryName = "mms-web-admin",
+    [string] $PackageName = "mms-web-admin-cpanel"
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,10 +15,10 @@ if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
 }
 
 $outputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
-$outputPath = Join-Path $outputDirectory "mms-web-admin-cpanel.zip"
-$setupInfoPath = Join-Path $outputDirectory "mms-web-admin-cpanel-setup.txt"
+$outputPath = Join-Path $outputDirectory "$PackageName.zip"
+$setupInfoPath = Join-Path $outputDirectory "$PackageName-setup.txt"
 $stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mms-web-admin-cpanel-" + [guid]::NewGuid())
-$stageApplication = Join-Path $stageRoot "mms-web-admin"
+$stageApplication = Join-Path $stageRoot $ApplicationDirectoryName
 
 function Invoke-Checked([string] $FilePath, [string[]] $Arguments, [string] $WorkingDirectory) {
     Push-Location $WorkingDirectory
@@ -63,14 +65,14 @@ function Assert-Package([string] $ZipPath) {
             throw "Deployment ZIP contains Windows path separators: $($backslashEntries -join ', ')"
         }
         $required = @(
-            "mms-web-admin/artisan",
-            "mms-web-admin/composer.json",
-            "mms-web-admin/composer.lock",
-            "mms-web-admin/.env.example",
-            "mms-web-admin/vendor/autoload.php",
-            "mms-web-admin/public/index.php",
-            "mms-web-admin/public/build/manifest.json",
-            "mms-web-admin/deploy/cpanel/web-setup/setup-token.php"
+            "$ApplicationDirectoryName/artisan",
+            "$ApplicationDirectoryName/composer.json",
+            "$ApplicationDirectoryName/composer.lock",
+            "$ApplicationDirectoryName/.env.example",
+            "$ApplicationDirectoryName/vendor/autoload.php",
+            "$ApplicationDirectoryName/public/index.php",
+            "$ApplicationDirectoryName/public/build/manifest.json",
+            "$ApplicationDirectoryName/deploy/cpanel/web-setup/setup-token.php"
         )
 
         foreach ($requiredPath in $required) {
@@ -79,14 +81,15 @@ function Assert-Package([string] $ZipPath) {
             }
         }
 
+        $rootPattern = [regex]::Escape($ApplicationDirectoryName)
         $forbidden = @($entries | Where-Object {
-            ($_ -eq "mms-web-admin/.env") -or
-            ($_ -match "^mms-web-admin/node_modules/") -or
-            ($_ -match "^mms-web-admin/tests/") -or
-            ($_ -match "^mms-web-admin/\.git/") -or
-            ($_ -match "^mms-web-admin/storage/(?!.*\.gitignore$)") -or
-            ($_ -match "^mms-web-admin/public/storage/") -or
-            ($_ -match "^mms-web-admin/bootstrap/cache/(?!.*\.gitignore$)") -or
+            ($_ -eq "$ApplicationDirectoryName/.env") -or
+            ($_ -match "^$rootPattern/node_modules/") -or
+            ($_ -match "^$rootPattern/tests/") -or
+            ($_ -match "^$rootPattern/\.git/") -or
+            ($_ -match "^$rootPattern/storage/(?!.*\.gitignore$)") -or
+            ($_ -match "^$rootPattern/public/storage/") -or
+            ($_ -match "^$rootPattern/bootstrap/cache/(?!.*\.gitignore$)") -or
             ($_ -match "\.log$")
         })
 
@@ -207,7 +210,7 @@ try {
     $sizeMb = [math]::Round((Get-Item -LiteralPath $outputPath).Length / 1MB, 2)
     [System.IO.File]::WriteAllText(
         $setupInfoPath,
-        "MMS cPanel Web Setup Token`r`n`r`nToken: $setupToken`r`n`r`nAfter extracting the ZIP and pointing the domain to mms-web-admin/public, open:`r`nhttps://YOUR-DOMAIN/cpanel_keymigrate.php?token=$setupToken`r`n`r`nKeep this file private. After setup, use cpanel_clear.php with the same token to disable all setup pages, then delete cpanel_*.php via cPanel File Manager.`r`n"
+        "MMS cPanel Web Setup Token`r`n`r`nApplication folder: $ApplicationDirectoryName`r`nToken: $setupToken`r`n`r`nAfter extracting the ZIP and pointing the domain to the public directory, open:`r`nhttps://YOUR-DOMAIN/cpanel_keymigrate.php?token=$setupToken`r`n`r`nKeep this file private. After setup, use cpanel_clear.php with the same token to disable all setup pages, then delete cpanel_*.php via cPanel File Manager.`r`n"
     )
 
     Write-Host "Created: $outputPath"

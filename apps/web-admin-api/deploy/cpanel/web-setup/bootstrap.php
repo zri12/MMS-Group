@@ -53,6 +53,12 @@ function cpanel_setup_bootstrap_application(): void
     }
 
     $application = require cpanel_setup_base_path().'/bootstrap/app.php';
+    $publicPath = getenv('MMS_CPANEL_PUBLIC_PATH');
+
+    if (is_string($publicPath) && $publicPath !== '' && is_dir($publicPath)) {
+        $application->usePublicPath($publicPath);
+    }
+
     $application->make(Kernel::class)->bootstrap();
     $booted = true;
 }

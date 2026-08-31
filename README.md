@@ -40,7 +40,10 @@ alamat IP LAN komputer yang menjalankan Laravel.
 3. Ikuti panduan lengkap di
    [`apps/web-admin-api/deploy/cpanel/README.md`](apps/web-admin-api/deploy/cpanel/README.md)
    untuk document root, MySQL, `.env`, migration, storage link, dan admin awal.
-4. Buat APK rilis dengan domain HTTPS:
+4. Untuk cPanel yang memisahkan folder aplikasi dan `public_html`, buat ZIP
+   public khusus dengan `./scripts/create-cpanel-public-package.ps1` dan upload
+   sesuai struktur folder yang dijelaskan pada panduan deployment.
+5. Buat APK rilis dengan domain HTTPS:
 
 ```powershell
 flutter build apk --release --dart-define=API_BASE_URL=https://domain-anda/api/v1

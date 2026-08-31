@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param(
-    [string] $OutputDirectory,
-    [string] $ProjectPath = "/home/fazriluk/PROJECT MESS MONITORING",
-    [string] $DocumentRoot = "/home/fazriluk/public_html/demoprojectweb.net"
+    [string] $ApplicationPath = "/home/fazriluk/PROJECT MMS WEB ADMIN",
+    [string] $PublicDirectoryName = "demoprojectweb.net",
+    [string] $OutputDirectory
 )
 
 $ErrorActionPreference = "Stop"
@@ -16,39 +16,28 @@ if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
 }
 
 $outputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
-$outputPath = Join-Path $outputDirectory "demoprojectweb.net-public.zip"
-$stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mms-public-cpanel-" + [guid]::NewGuid())
-$stagePublic = Join-Path $stageRoot "demoprojectweb.net"
+$outputPath = Join-Path $outputDirectory "$PublicDirectoryName-public.zip"
+$stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mms-cpanel-public-" + [guid]::NewGuid())
+$stagePublic = Join-Path $stageRoot $PublicDirectoryName
 
 function Ensure-Directory([string] $Path) {
     New-Item -ItemType Directory -Force -Path $Path | Out-Null
 }
 
-function Invoke-Checked([string] $FilePath, [string[]] $Arguments, [string] $WorkingDirectory) {
-    Push-Location $WorkingDirectory
-    try {
-        & $FilePath @Arguments
-        if ($LASTEXITCODE -ne 0) {
-            throw "Command failed: $FilePath $($Arguments -join ' ')"
-        }
-    } finally {
-        Pop-Location
+function Copy-PublicTree() {
+    if (-not (Test-Path -LiteralPath $sourcePublic)) {
+        throw "Public directory is missing: $sourcePublic"
     }
-}
 
-function Copy-PublicContents() {
     Ensure-Directory $stagePublic
-
-    Get-ChildItem -LiteralPath $sourcePublic -Force | ForEach-Object {
-        if ($_.Name -eq "storage") {
-            return
-        }
-
+    Get-ChildItem -LiteralPath $sourcePublic -Force | Where-Object {
+        $_.Name -ne "storage"
+    } | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $stagePublic $_.Name) -Recurse -Force
     }
 }
 
-function Assert-Package([string] $ZipPath, [string] $ExpectedProjectPath) {
+function Assert-Package([string] $ZipPath) {
     Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
 
@@ -56,14 +45,14 @@ function Assert-Package([string] $ZipPath, [string] $ExpectedProjectPath) {
     try {
         $entries = @($archive.Entries | Where-Object { -not $_.FullName.EndsWith("/") } | ForEach-Object { $_.FullName })
         $required = @(
-            "demoprojectweb.net/index.php",
-            "demoprojectweb.net/.htaccess",
-            "demoprojectweb.net/build/manifest.json",
-            "demoprojectweb.net/cpanel_keymigrate.php",
-            "demoprojectweb.net/cpanel_storage.php",
-            "demoprojectweb.net/cpanel_provision_admin.php",
-            "demoprojectweb.net/cpanel_optimize.php",
-            "demoprojectweb.net/cpanel_clear.php"
+            "$PublicDirectoryName/index.php",
+            "$PublicDirectoryName/.htaccess",
+            "$PublicDirectoryName/build/manifest.json",
+            "$PublicDirectoryName/cpanel_keymigrate.php",
+            "$PublicDirectoryName/cpanel_storage.php",
+            "$PublicDirectoryName/cpanel_provision_admin.php",
+            "$PublicDirectoryName/cpanel_optimize.php",
+            "$PublicDirectoryName/cpanel_clear.php"
         )
 
         foreach ($requiredPath in $required) {
@@ -72,20 +61,13 @@ function Assert-Package([string] $ZipPath, [string] $ExpectedProjectPath) {
             }
         }
 
-        if ($entries | Where-Object { $_ -match "^demoprojectweb\.net/storage/" -or $_ -match "^demoprojectweb\.net/\.env$" }) {
-            throw "Public ZIP contains forbidden runtime files."
-        }
+        $forbidden = @($entries | Where-Object {
+            ($_ -match "^$([regex]::Escape($PublicDirectoryName))/(\.env|vendor/|storage/|bootstrap/|app/|config/|database/|routes/|resources/)") -or
+            ($_ -match "\.log$")
+        })
 
-        $indexEntry = $archive.GetEntry("demoprojectweb.net/index.php")
-        $reader = [System.IO.StreamReader]::new($indexEntry.Open())
-        try {
-            $indexContent = $reader.ReadToEnd()
-        } finally {
-            $reader.Dispose()
-        }
-
-        if (-not $indexContent.Contains($ExpectedProjectPath)) {
-            throw "Public index.php does not target the requested project path."
+        if ($forbidden.Count -gt 0) {
+            throw "Public ZIP contains private files: $($forbidden -join ', ')"
         }
 
         return $entries.Count
@@ -94,25 +76,16 @@ function Assert-Package([string] $ZipPath, [string] $ExpectedProjectPath) {
     }
 }
 
-if (-not (Test-Path -LiteralPath $sourcePublic)) {
-    throw "Laravel public directory is missing: $sourcePublic"
-}
-if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
-    throw "npm must be available to build the public deployment package."
-}
-
 Ensure-Directory $outputDirectory
 if (Test-Path -LiteralPath $outputPath) {
     Remove-Item -LiteralPath $outputPath -Force
 }
 
 try {
-    Invoke-Checked "npm" @("ci") $applicationRoot
-    Invoke-Checked "npm" @("run", "build") $applicationRoot
-    Copy-PublicContents
+    Copy-PublicTree
 
-    $phpProjectPath = $ProjectPath.Replace("\", "/").Replace("'", "\\'")
-    $indexTemplate = @'
+    $phpApplicationPath = $ApplicationPath.Replace("\", "/").Replace("'", "\'")
+    $indexContent = @'
 <?php
 
 use Illuminate\Foundation\Application;
@@ -120,43 +93,36 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-$projectRoot = '__PROJECT_ROOT__';
+$applicationPath = '__APPLICATION_PATH__';
 
-if (! is_file($projectRoot.'/vendor/autoload.php')) {
-    http_response_code(500);
-    exit('Laravel project files are not available.');
-}
-
-if (file_exists($maintenance = $projectRoot.'/storage/framework/maintenance.php')) {
+if (file_exists($maintenance = $applicationPath.'/storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-require $projectRoot.'/vendor/autoload.php';
+require $applicationPath.'/vendor/autoload.php';
 
 /** @var Application $app */
-$app = require_once $projectRoot.'/bootstrap/app.php';
+$app = require_once $applicationPath.'/bootstrap/app.php';
+$app->usePublicPath(__DIR__);
 
 $app->handleRequest(Request::capture());
 '@
     [System.IO.File]::WriteAllText(
         (Join-Path $stagePublic "index.php"),
-        $indexTemplate.Replace("__PROJECT_ROOT__", $phpProjectPath)
+        $indexContent.Replace("__APPLICATION_PATH__", $phpApplicationPath)
     )
 
-    $bootstrapRequire = "require '$phpProjectPath/deploy/cpanel/web-setup/bootstrap.php';"
-    foreach ($fileName in @(
+    $setupRequire = "putenv('MMS_CPANEL_PUBLIC_PATH='.__DIR__);`r`n`r`nrequire '$phpApplicationPath/deploy/cpanel/web-setup/bootstrap.php';"
+    foreach ($filename in @(
         "cpanel_keymigrate.php",
         "cpanel_storage.php",
         "cpanel_provision_admin.php",
         "cpanel_optimize.php",
         "cpanel_clear.php"
     )) {
-        $path = Join-Path $stagePublic $fileName
+        $path = Join-Path $stagePublic $filename
         $content = [System.IO.File]::ReadAllText($path)
-        $content = $content.Replace(
-            "require __DIR__.'/../deploy/cpanel/web-setup/bootstrap.php';",
-            $bootstrapRequire
-        )
+        $content = $content.Replace("require __DIR__.'/../deploy/cpanel/web-setup/bootstrap.php';", $setupRequire)
         [System.IO.File]::WriteAllText($path, $content)
     }
 
@@ -184,12 +150,12 @@ $app->handleRequest(Request::capture());
         $archive.Dispose()
     }
 
-    $entryCount = Assert-Package $outputPath $phpProjectPath
+    $entryCount = Assert-Package $outputPath
     $sizeMb = [math]::Round((Get-Item -LiteralPath $outputPath).Length / 1MB, 2)
 
     Write-Host "Created: $outputPath"
-    Write-Host "Project path: $ProjectPath"
-    Write-Host "Document root: $DocumentRoot"
+    Write-Host "Application path: $ApplicationPath"
+    Write-Host "Public target: /home/fazriluk/public_html/$PublicDirectoryName"
     Write-Host "ZIP entries: $entryCount"
     Write-Host "ZIP size MB: $sizeMb"
 } catch {
