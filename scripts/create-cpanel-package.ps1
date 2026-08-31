@@ -14,6 +14,7 @@ if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
 
 $outputDirectory = [System.IO.Path]::GetFullPath($OutputDirectory)
 $outputPath = Join-Path $outputDirectory "mms-web-admin-cpanel.zip"
+$setupInfoPath = Join-Path $outputDirectory "mms-web-admin-cpanel-setup.txt"
 $stageRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("mms-web-admin-cpanel-" + [guid]::NewGuid())
 $stageApplication = Join-Path $stageRoot "mms-web-admin"
 
@@ -68,7 +69,8 @@ function Assert-Package([string] $ZipPath) {
             "mms-web-admin/.env.example",
             "mms-web-admin/vendor/autoload.php",
             "mms-web-admin/public/index.php",
-            "mms-web-admin/public/build/manifest.json"
+            "mms-web-admin/public/build/manifest.json",
+            "mms-web-admin/deploy/cpanel/web-setup/setup-token.php"
         )
 
         foreach ($requiredPath in $required) {
@@ -110,6 +112,9 @@ Ensure-Directory $outputDirectory
 if (Test-Path -LiteralPath $outputPath) {
     Remove-Item -LiteralPath $outputPath -Force
 }
+if (Test-Path -LiteralPath $setupInfoPath) {
+    Remove-Item -LiteralPath $setupInfoPath -Force
+}
 
 try {
     Invoke-Checked "npm" @("ci") $applicationRoot
@@ -138,6 +143,20 @@ try {
     )) {
         Copy-RequiredItem $relativePath
     }
+
+    $setupTokenBytes = New-Object byte[] 32
+    $randomNumberGenerator = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+    try {
+        $randomNumberGenerator.GetBytes($setupTokenBytes)
+    } finally {
+        $randomNumberGenerator.Dispose()
+    }
+    $setupToken = ($setupTokenBytes | ForEach-Object { $_.ToString("x2") }) -join ""
+    $setupTokenFile = Join-Path $stageApplication "deploy\cpanel\web-setup\setup-token.php"
+    [System.IO.File]::WriteAllText(
+        $setupTokenFile,
+        "<?php`r`n`r`ndeclare(strict_types=1);`r`n`r`nreturn '$setupToken';`r`n"
+    )
 
     Remove-Item -LiteralPath (Join-Path $stageApplication "public\storage") -Force -Recurse -ErrorAction SilentlyContinue
     Get-ChildItem -LiteralPath (Join-Path $stageApplication "bootstrap\cache") -Force |
@@ -186,13 +205,21 @@ try {
     }
     $entryCount = Assert-Package $outputPath
     $sizeMb = [math]::Round((Get-Item -LiteralPath $outputPath).Length / 1MB, 2)
+    [System.IO.File]::WriteAllText(
+        $setupInfoPath,
+        "MMS cPanel Web Setup Token`r`n`r`nToken: $setupToken`r`n`r`nAfter extracting the ZIP and pointing the domain to mms-web-admin/public, open:`r`nhttps://YOUR-DOMAIN/cpanel_keymigrate.php?token=$setupToken`r`n`r`nKeep this file private. After setup, use cpanel_clear.php with the same token to disable all setup pages, then delete cpanel_*.php via cPanel File Manager.`r`n"
+    )
 
     Write-Host "Created: $outputPath"
+    Write-Host "Setup token: $setupInfoPath"
     Write-Host "ZIP entries: $entryCount"
     Write-Host "ZIP size MB: $sizeMb"
 } catch {
     if (Test-Path -LiteralPath $outputPath) {
         Remove-Item -LiteralPath $outputPath -Force
+    }
+    if (Test-Path -LiteralPath $setupInfoPath) {
+        Remove-Item -LiteralPath $setupInfoPath -Force
     }
 
     throw
