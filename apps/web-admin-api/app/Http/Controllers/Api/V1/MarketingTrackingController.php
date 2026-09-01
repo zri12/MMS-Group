@@ -18,6 +18,7 @@ use App\Http\Resources\Api\V1\TrackingSessionResource;
 use App\Models\TrackingPoint;
 use App\Models\TrackingSession;
 use App\Support\ApiResponse;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,6 +53,7 @@ class MarketingTrackingController
             ->withCount('points')
             ->where('marketing_profile_id', $request->user()->marketingProfile->id)
             ->where('status', TrackingStatus::Active->value)
+            ->whereDate('session_date', CarbonImmutable::now(config('mms.timezone'))->toDateString())
             ->latest('started_at')
             ->first();
 
@@ -101,11 +103,16 @@ class MarketingTrackingController
         );
     }
 
-    public function storePoint(StoreTrackingPointRequest $request, TrackingSession $trackingSession, StoreTrackingPointsAction $action): JsonResponse
+    public function storePoint(StoreTrackingPointRequest $request, string $trackingSession, StoreTrackingPointsAction $action): JsonResponse
     {
+        $session = $this->resolveWritableSession($request, $trackingSession);
+        if (! $session) {
+            return $this->trackingSessionNotFound();
+        }
+
         $result = $action->execute(
             marketing: $request->user()->marketingProfile,
-            session: $trackingSession,
+            session: $session,
             points: [$request->validated()],
         );
 
@@ -115,11 +122,16 @@ class MarketingTrackingController
         );
     }
 
-    public function storePointBatch(StoreTrackingPointsBatchRequest $request, TrackingSession $trackingSession, StoreTrackingPointsAction $action): JsonResponse
+    public function storePointBatch(StoreTrackingPointsBatchRequest $request, string $trackingSession, StoreTrackingPointsAction $action): JsonResponse
     {
+        $session = $this->resolveWritableSession($request, $trackingSession);
+        if (! $session) {
+            return $this->trackingSessionNotFound();
+        }
+
         $result = $action->execute(
             marketing: $request->user()->marketingProfile,
-            session: $trackingSession,
+            session: $session,
             points: $request->validated('points'),
         );
 
@@ -129,11 +141,16 @@ class MarketingTrackingController
         );
     }
 
-    public function stop(StopTrackingSessionRequest $request, TrackingSession $trackingSession, StopTrackingSessionAction $action): JsonResponse
+    public function stop(StopTrackingSessionRequest $request, string $trackingSession, StopTrackingSessionAction $action): JsonResponse
     {
+        $session = $this->resolveWritableSession($request, $trackingSession);
+        if (! $session) {
+            return $this->trackingSessionNotFound();
+        }
+
         $session = $action->execute(
             marketing: $request->user()->marketingProfile,
-            session: $trackingSession,
+            session: $session,
             data: $request->validated(),
         );
 
@@ -154,5 +171,36 @@ class MarketingTrackingController
             'duplicate_count' => $result['duplicate_count'],
             'points' => TrackingPointResource::collection($result['points'])->resolve(),
         ];
+    }
+
+    private function resolveWritableSession(Request $request, string $sessionId): ?TrackingSession
+    {
+        $marketingId = $request->user()->marketingProfile->id;
+        $session = TrackingSession::query()
+            ->whereKey($sessionId)
+            ->where('marketing_profile_id', $marketingId)
+            ->first();
+
+        if ($session) {
+            return $session;
+        }
+
+        // The device can retain an old session ID after an interrupted app
+        // update or a token refresh. Recover only to this same marketer's
+        // active session for today; another marketer's session is never used.
+        return TrackingSession::query()
+            ->where('marketing_profile_id', $marketingId)
+            ->where('status', TrackingStatus::Active->value)
+            ->whereDate('session_date', CarbonImmutable::now(config('mms.timezone'))->toDateString())
+            ->latest('started_at')
+            ->first();
+    }
+
+    private function trackingSessionNotFound(): JsonResponse
+    {
+        return ApiResponse::error(
+            message: 'Sesi tracking aktif tidak ditemukan. Mulai tracking kembali.',
+            status: 404,
+        );
     }
 }

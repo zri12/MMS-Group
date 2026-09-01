@@ -27,13 +27,16 @@ class MmsMarketingApp extends StatefulWidget {
   /// Overridable for tests so a fake [AuthController]/`AuthService` can be
   /// injected instead of hitting a real network + secure storage.
   final AuthController? authController;
+
   /// Overridable for tests so a fake [LocationService] can be injected
   /// instead of hitting the real permission_handler/geolocator platform
   /// channels (unmocked under plain `flutter test`).
   final LocationService? locationService;
+
   /// Overridable for tests so the periodic `/health` connectivity check
   /// doesn't hit the network (see `_startHealthChecks`).
   final AuthService? healthService;
+
   /// Overridable for tests so ConsumersScreen/ReportsScreen/etc. (reached
   /// only through AppShell's router) don't hit the network either.
   final ProspectService? prospectService;
@@ -42,14 +45,17 @@ class MmsMarketingApp extends StatefulWidget {
   final OperationalReportService? operationalReportService;
   final PhotoService? photoService;
   final ScheduleService? scheduleService;
+
   /// Overridable for tests so the periodic post-health-check queue flush
   /// doesn't touch the real `sqflite` platform channel (unmocked under
   /// plain `flutter test`, same footgun as `flutter_secure_storage`).
   final SyncQueueStore? syncQueueStore;
   final SyncDispatcher? syncDispatcher;
+
   /// Overridable for tests so the tracking-session lifecycle doesn't touch
   /// the real geolocator platform channel or network.
   final TrackingController? trackingController;
+
   /// Overridable for tests so `JourneyDetailScreen`'s history lookup
   /// (independent of the live session `trackingController` owns) doesn't
   /// hit the network either.
@@ -75,22 +81,31 @@ class MmsMarketingApp extends StatefulWidget {
   State<MmsMarketingApp> createState() => _MmsMarketingAppState();
 }
 
-class _MmsMarketingAppState extends State<MmsMarketingApp> with WidgetsBindingObserver {
+class _MmsMarketingAppState extends State<MmsMarketingApp>
+    with WidgetsBindingObserver {
   final _nav = NavController();
   late final AuthController _auth = widget.authController ?? AuthController();
-  late final LocationService _location = widget.locationService ?? LocationService();
+  late final LocationService _location =
+      widget.locationService ?? LocationService();
   late final AuthService _health = widget.healthService ?? AuthService();
-  late final SyncQueueStore _syncStore = widget.syncQueueStore ?? createDefaultSyncQueueStore();
-  late final TrackingService _trackingService = widget.trackingService ?? TrackingService();
-  late final SyncDispatcher _syncDispatcher = widget.syncDispatcher ?? SyncDispatcher(trackingService: _trackingService);
+  late final SyncQueueStore _syncStore =
+      widget.syncQueueStore ?? createDefaultSyncQueueStore();
+  late final TrackingService _trackingService =
+      widget.trackingService ?? TrackingService();
+  late final SyncDispatcher _syncDispatcher =
+      widget.syncDispatcher ??
+      SyncDispatcher(trackingService: _trackingService);
   // Shares `_syncStore` (not its own default) so GPS points queued on a
   // failed flush land in the same queue `_syncDispatcher` drains on every
   // healthy tick — a separate default here would silently create an
   // isolated, never-drained queue (the exact bug already fixed once for
   // per-screen sync stores, see createDefaultSyncQueueStore's doc comment).
-  late final TrackingController _tracking = widget.trackingController ?? TrackingController(syncQueueStore: _syncStore);
+  late final TrackingController _tracking =
+      widget.trackingController ??
+      TrackingController(syncQueueStore: _syncStore);
   Timer? _healthTimer;
   AuthStatus _lastAuthStatus = AuthStatus.unknown;
+  int? _trackingUserId;
 
   @override
   void initState() {
@@ -123,10 +138,19 @@ class _MmsMarketingAppState extends State<MmsMarketingApp> with WidgetsBindingOb
   /// (both land on `unauthenticated`). See BACKEND_INTEGRATION_TASKS.md's
   /// Tracking section for the "auto-start on login" product decision.
   void _onAuthChanged() {
-    if (_auth.status == AuthStatus.authenticated && _lastAuthStatus != AuthStatus.authenticated) {
-      unawaited(_tracking.ensureStarted());
-    } else if (_auth.status == AuthStatus.unauthenticated && _lastAuthStatus == AuthStatus.authenticated) {
+    if (_auth.status == AuthStatus.authenticated) {
+      final userId = _auth.user?.id;
+      final accountChanged =
+          _trackingUserId != null && _trackingUserId != userId;
+      if (accountChanged) _tracking.resetForAccountChange();
+      if (_lastAuthStatus != AuthStatus.authenticated || accountChanged) {
+        unawaited(_tracking.ensureStarted());
+      }
+      _trackingUserId = userId;
+    } else if (_auth.status == AuthStatus.unauthenticated &&
+        _lastAuthStatus == AuthStatus.authenticated) {
       unawaited(_tracking.stop());
+      _trackingUserId = null;
     }
     _lastAuthStatus = _auth.status;
     setState(() {});
@@ -141,7 +165,10 @@ class _MmsMarketingAppState extends State<MmsMarketingApp> with WidgetsBindingOb
   /// number — same caveat as the tracking GPS sampling interval.
   void _startHealthChecks() {
     _checkHealth();
-    _healthTimer = Timer.periodic(const Duration(seconds: 30), (_) => _checkHealth());
+    _healthTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _checkHealth(),
+    );
   }
 
   Future<void> _checkHealth() async {

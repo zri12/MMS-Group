@@ -164,7 +164,7 @@ class DashboardTest extends TestCase
             ->assertSee('Belum ada foto bukti transfer');
     }
 
-    public function test_dashboard_defaults_to_the_latest_operational_report_date(): void
+    public function test_dashboard_defaults_to_the_current_server_date(): void
     {
         CarbonImmutable::setTestNow('2026-07-26 10:00:00');
 
@@ -182,8 +182,8 @@ class DashboardTest extends TestCase
             $this->actingAs($admin)
                 ->get('/admin/dashboard')
                 ->assertOk()
-                ->assertSee('Sabtu, 25 Juli 2026')
-                ->assertSee('Rp 8.000.000');
+                ->assertSee('Minggu, 26 Juli 2026')
+                ->assertDontSee('Rp 8.000.000');
         } finally {
             CarbonImmutable::setTestNow();
         }

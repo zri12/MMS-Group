@@ -24,6 +24,9 @@ class LocationServiceException implements Exception {
 /// `LocationCard`'s consuming screens once those screens are unblocked by
 /// the Phase 0 Consumer/Prospect/Member decision.
 class LocationService {
+  static const _currentPositionTimeout = Duration(seconds: 30);
+  static const _maximumLastKnownAge = Duration(minutes: 5);
+
   Future<ph.PermissionStatus> requestPermission(AppPermissionKind kind) async {
     final permission = switch (kind) {
       AppPermissionKind.location => ph.Permission.locationWhenInUse,
@@ -50,17 +53,17 @@ class LocationService {
 
     final permission = await Geolocator.checkPermission();
     return switch (permission) {
-      LocationPermission.always || LocationPermission.whileInUse =>
-        TrackingLocationStatus.ready,
+      LocationPermission.always ||
+      LocationPermission.whileInUse => TrackingLocationStatus.ready,
       _ => TrackingLocationStatus.permissionDenied,
     };
   }
 
   Future<bool> openLocationSettings() => ph.openAppSettings();
 
-  /// Real current GPS position. Throws [LocationServiceException] with a
-  /// user-facing Indonesian message on failure (GPS disabled, permission
-  /// denied, timeout) rather than a raw platform exception.
+  /// Reads a current GPS position, with a short-lived last known point as a
+  /// fallback. Fused-location fixes can take longer indoors, so the prior
+  /// 15-second hard timeout made a permitted GPS look broken too often.
   Future<Position> getCurrentPosition() async {
     await _ensureLocationAccess();
 
@@ -68,13 +71,26 @@ class LocationService {
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
+          timeLimit: _currentPositionTimeout,
         ),
       );
     } catch (_) {
+      final lastKnown = await _freshLastKnownPosition();
+      if (lastKnown != null) return lastKnown;
       throw const LocationServiceException(
-        'Gagal mendapatkan lokasi. Coba lagi.',
+        'GPS belum memperoleh koordinat. Pastikan lokasi perangkat aktif dan coba di area terbuka.',
       );
+    }
+  }
+
+  Future<Position?> _freshLastKnownPosition() async {
+    try {
+      final position = await Geolocator.getLastKnownPosition();
+      if (position == null) return null;
+      final age = DateTime.now().difference(position.timestamp);
+      return age <= _maximumLastKnownAge ? position : null;
+    } catch (_) {
+      return null;
     }
   }
 

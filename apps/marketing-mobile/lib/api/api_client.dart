@@ -57,9 +57,8 @@ class TokenStorage implements TokenStore {
 
 /// Thin wrapper around Dio for the marketing `/api/v1` REST API.
 ///
-/// Base URL is build-time configurable (no fixed deployed URL exists yet —
-/// see BACKEND_INTEGRATION_TASKS.md Phase 8):
-///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
+/// Base URL is build-time configurable. `MMS_API_BASE_URL` is the production
+/// build setting; `API_BASE_URL` remains supported for existing local builds.
 class ApiClient {
   ApiClient._internal() {
     _dio = Dio(
@@ -93,11 +92,14 @@ class ApiClient {
   static final ApiClient instance = ApiClient._internal();
 
   static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
+    'MMS_API_BASE_URL',
     // A physical device cannot reach its server through `localhost`. The
     // invalid default prevents a release APK from accidentally targeting the
     // customer's own phone; every install must be built with API_BASE_URL.
-    defaultValue: 'https://mms.invalid/api/v1',
+    defaultValue: String.fromEnvironment(
+      'API_BASE_URL',
+      defaultValue: 'https://mms.invalid/api/v1',
+    ),
   );
 
   /// Resolves a possibly-relative media URL (e.g. an attachment's

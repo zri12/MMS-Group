@@ -107,12 +107,6 @@ class TrackingController extends Controller
             return CarbonImmutable::createFromFormat('!Y-m-d', $date);
         }
 
-        $latestSessionDate = TrackingSession::query()->max('session_date');
-
-        if (is_string($latestSessionDate) && $latestSessionDate !== '') {
-            return CarbonImmutable::parse($latestSessionDate, config('mms.timezone'));
-        }
-
         return CarbonImmutable::now(config('mms.timezone'))->startOfDay();
     }
 
@@ -120,7 +114,13 @@ class TrackingController extends Controller
     {
         $dateString = $date->toDateString();
 
-        if ($this->isLiveDate($date) && $status === TrackingStatus::Active) {
+        if ($status === TrackingStatus::Active) {
+            if (! $this->isLiveDate($date)) {
+                $query->whereRaw('1 = 0');
+
+                return;
+            }
+
             $query->whereHas('trackingSessions', fn (Builder $query) => $query
                 ->whereDate('session_date', $dateString)
                 ->where('status', TrackingStatus::Active->value)
@@ -130,7 +130,13 @@ class TrackingController extends Controller
             return;
         }
 
-        if ($this->isLiveDate($date) && $status === TrackingStatus::GpsInactive) {
+        if ($status === TrackingStatus::GpsInactive) {
+            if (! $this->isLiveDate($date)) {
+                $query->whereRaw('1 = 0');
+
+                return;
+            }
+
             $query
                 ->whereHas('trackingSessions', fn (Builder $query) => $query
                     ->whereDate('session_date', $dateString)
@@ -140,6 +146,14 @@ class TrackingController extends Controller
                     ->where('status', TrackingStatus::Active->value)
                     ->whereHas('latestPoint', fn (Builder $pointQuery) => $pointQuery
                         ->where('received_at', '>=', $this->gpsFreshAfter())));
+
+            return;
+        }
+
+        if (! $this->isLiveDate($date) && $status === TrackingStatus::Offline) {
+            $query->whereHas('trackingSessions', fn (Builder $query) => $query
+                ->whereDate('session_date', $dateString)
+                ->whereIn('status', [TrackingStatus::Offline->value, TrackingStatus::Active->value]));
 
             return;
         }
@@ -226,15 +240,21 @@ class TrackingController extends Controller
 
     private function displayStatus(TrackingSession $session, ?TrackingPoint $point, CarbonInterface $date): TrackingStatus
     {
-        if (
-            $session->status === TrackingStatus::Active
-            && $this->isLiveDate($date)
-            && (! $point || ! $point->received_at || $point->received_at->lt($this->gpsFreshAfter()))
-        ) {
+        if ($session->status !== TrackingStatus::Active) {
+            return $session->status;
+        }
+
+        // A session that was left open on a previous date is historical, not
+        // a live location. This occurs after an interrupted device or SQL import.
+        if (! $this->isLiveDate($date)) {
+            return TrackingStatus::Offline;
+        }
+
+        if (! $point || ! $point->received_at || $point->received_at->lt($this->gpsFreshAfter())) {
             return TrackingStatus::GpsInactive;
         }
 
-        return $session->status;
+        return TrackingStatus::Active;
     }
 
     private function isLiveDate(CarbonInterface $date): bool

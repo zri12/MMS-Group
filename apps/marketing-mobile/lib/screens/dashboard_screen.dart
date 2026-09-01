@@ -30,13 +30,13 @@ const _dayWeekdayIndex = {
   'Kamis': 4,
   'Jumat': 5,
   'Sabtu': 6,
-  if (_allowSundayOperations) 'Minggu': 7,
+  'Minggu': 7,
 };
 
 String _todayDayName() {
   final weekday = DateTime.now().weekday; // 1=Senin..7=Minggu
   if (weekday >= 1 && weekday <= 6) return _days[weekday - 1];
-  return _allowSundayOperations ? 'Minggu' : _days.first;
+  return 'Minggu';
 }
 
 String _isoDate(DateTime d) =>
@@ -86,15 +86,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _scheduleError;
 
   Future<void> _startTracking() async {
-    final started = await widget.tracking.ensureStarted();
+    final started = await widget.tracking.ensureStarted(force: true);
     if (!mounted || started) return;
-    final issue = widget.tracking.startIssueMessage ?? 'Sesi tracking belum dapat dimulai.';
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(issue),
-      action: widget.tracking.needsLocationSettings
-          ? SnackBarAction(label: 'PENGATURAN', onPressed: () { widget.tracking.openLocationSettings(); })
-          : null,
-    ));
+    final issue =
+        widget.tracking.startIssueMessage ??
+        'Sesi tracking belum dapat dimulai.';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(issue),
+        action: widget.tracking.needsLocationSettings
+            ? SnackBarAction(
+                label: 'PENGATURAN',
+                onPressed: () {
+                  widget.tracking.openLocationSettings();
+                },
+              )
+            : null,
+      ),
+    );
   }
 
   @override
@@ -146,7 +155,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_scheduleCache.containsKey(day)) return;
     setState(() => _scheduleError = null);
     try {
-      final list = await _scheduleService.list(day: day);
+      final list = await _scheduleService.list(
+        day: day,
+        date: _isoDate(_dateForDay(day)),
+      );
       if (!mounted) return;
       setState(() {
         _scheduleCache[day] = list;
@@ -342,11 +354,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildTrackingCard() {
-    final active = widget.tracking.isActive;
-    final headline = active ? 'Tracking Aktif' : 'Tracking Tidak Aktif';
-    final desc = active
-        ? 'Lokasi Anda sedang direkam untuk laporan perjalanan hari ini.'
-        : 'Sesi tracking belum berjalan. Pastikan izin lokasi sudah diberikan.';
+    final sessionActive = widget.tracking.isActive;
+    final synced = widget.tracking.hasFreshSyncedLocation;
+    final issue = widget.tracking.trackingIssue;
+    final headline = !sessionActive
+        ? 'Tracking Tidak Aktif'
+        : synced
+        ? 'Tracking Aktif'
+        : issue != null
+        ? 'GPS Belum Tersinkron'
+        : 'Mencari Lokasi';
+    final desc = !sessionActive
+        ? 'Sesi tracking belum berjalan. Pastikan izin lokasi sudah diberikan.'
+        : synced
+        ? 'Lokasi Anda telah diterima server dan tampil di peta admin.'
+        : issue ??
+              'Menunggu titik GPS pertama diterima server. Buka detail untuk memperbarui lokasi.';
     return GestureDetector(
       onTap: () => widget.nav.navigate(AppScreen.trackingDetail),
       child: Container(
@@ -376,8 +399,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Row(
                           children: [
                             StatusDot(
-                              type: active
+                              type: synced
                                   ? StatusDotType.online
+                                  : sessionActive
+                                  ? StatusDotType.warning
                                   : StatusDotType.offline,
                             ),
                             const SizedBox(width: 6),
@@ -408,7 +433,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        if (!active)
+                        if (!sessionActive)
                           GestureDetector(
                             onTap: _startTracking,
                             child: Container(

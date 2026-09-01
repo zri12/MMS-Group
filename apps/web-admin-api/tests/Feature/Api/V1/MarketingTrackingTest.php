@@ -12,6 +12,7 @@ use App\Models\MarketingSchedule;
 use App\Models\TrackingPoint;
 use App\Models\TrackingSession;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -29,51 +30,114 @@ class MarketingTrackingTest extends TestCase
 
     public function test_marketing_can_start_tracking_idempotently_and_read_current_session(): void
     {
-        [$marketing, $token] = $this->marketingToken('M01');
-        $schedule = MarketingSchedule::factory()->create(['marketing_profile_id' => $marketing->id]);
-        $uuid = (string) Str::uuid();
-        $payload = [
-            'local_uuid' => $uuid,
-            'schedule_id' => $schedule->id,
-            'started_at' => '2026-07-20T08:05:00+07:00',
-        ];
+        CarbonImmutable::setTestNow('2026-07-20 08:00:00');
 
-        $first = $this->withToken($token)->postJson('/api/v1/tracking/sessions/start', $payload);
-        $second = $this->withToken($token)->postJson('/api/v1/tracking/sessions/start', $payload);
+        try {
+            [$marketing, $token] = $this->marketingToken('M01');
+            $schedule = MarketingSchedule::factory()->create(['marketing_profile_id' => $marketing->id]);
+            $uuid = (string) Str::uuid();
+            $payload = [
+                'local_uuid' => $uuid,
+                'schedule_id' => $schedule->id,
+                'started_at' => '2026-07-20T08:05:00+07:00',
+            ];
 
-        $first->assertCreated();
-        $second->assertCreated();
-        $this->assertSame($first->json('data.session_id'), $second->json('data.session_id'));
-        $this->assertDatabaseCount('tracking_sessions', 1);
-        $this->assertDatabaseHas('tracking_sessions', [
-            'marketing_profile_id' => $marketing->id,
-            'local_uuid' => $uuid,
-            'status' => TrackingStatus::Active->value,
-            'day_name' => DayName::Monday->value,
-        ]);
+            $first = $this->withToken($token)->postJson('/api/v1/tracking/sessions/start', $payload);
+            $second = $this->withToken($token)->postJson('/api/v1/tracking/sessions/start', $payload);
 
-        $this->withToken($token)
-            ->getJson('/api/v1/tracking/sessions/current')
-            ->assertOk()
-            ->assertJsonPath('data.id', $first->json('data.session_id'));
+            $first->assertCreated();
+            $second->assertCreated();
+            $this->assertSame($first->json('data.session_id'), $second->json('data.session_id'));
+            $this->assertDatabaseCount('tracking_sessions', 1);
+            $this->assertDatabaseHas('tracking_sessions', [
+                'marketing_profile_id' => $marketing->id,
+                'local_uuid' => $uuid,
+                'status' => TrackingStatus::Active->value,
+                'day_name' => DayName::Monday->value,
+            ]);
+
+            $this->withToken($token)
+                ->getJson('/api/v1/tracking/sessions/current')
+                ->assertOk()
+                ->assertJsonPath('data.id', $first->json('data.session_id'));
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
+    public function test_current_tracking_excludes_an_open_session_from_a_previous_day(): void
+    {
+        CarbonImmutable::setTestNow('2026-09-01 10:00:00');
+
+        try {
+            [$marketing, $token] = $this->marketingToken('M01');
+            TrackingSession::factory()->active()->create([
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-08-30',
+                'day_name' => DayName::Sunday->value,
+            ]);
+
+            $this->withToken($token)
+                ->getJson('/api/v1/tracking/sessions/current')
+                ->assertOk()
+                ->assertJsonPath('data', null);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
+    public function test_marketing_can_start_today_when_only_a_previous_day_session_remains_open(): void
+    {
+        CarbonImmutable::setTestNow('2026-09-01 08:05:00');
+
+        try {
+            [$marketing, $token] = $this->marketingToken('M01');
+            TrackingSession::factory()->active()->create([
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-08-30',
+                'day_name' => DayName::Sunday->value,
+            ]);
+
+            $this->withToken($token)
+                ->postJson('/api/v1/tracking/sessions/start', [
+                    'local_uuid' => (string) Str::uuid(),
+                    'started_at' => '2026-08-30T08:05:00+07:00',
+                ])
+                ->assertCreated();
+
+            $this->assertDatabaseCount('tracking_sessions', 2);
+            $this->assertDatabaseHas('tracking_sessions', [
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-09-01 00:00:00',
+                'day_name' => DayName::Tuesday->value,
+            ]);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     public function test_marketing_can_start_tracking_on_sunday_when_test_mode_is_enabled(): void
     {
         config(['mms.testing.allow_sunday_operations' => true]);
-        [$marketing, $token] = $this->marketingToken('M01');
+        CarbonImmutable::setTestNow('2026-08-30 08:05:00');
 
-        $this->withToken($token)
-            ->postJson('/api/v1/tracking/sessions/start', [
-                'local_uuid' => (string) Str::uuid(),
-                'started_at' => '2026-08-30T08:05:00+07:00',
-            ])
-            ->assertCreated();
+        try {
+            [$marketing, $token] = $this->marketingToken('M01');
 
-        $this->assertDatabaseHas('tracking_sessions', [
-            'marketing_profile_id' => $marketing->id,
-            'day_name' => DayName::Sunday->value,
-        ]);
+            $this->withToken($token)
+                ->postJson('/api/v1/tracking/sessions/start', [
+                    'local_uuid' => (string) Str::uuid(),
+                    'started_at' => '2026-08-30T08:05:00+07:00',
+                ])
+                ->assertCreated();
+
+            $this->assertDatabaseHas('tracking_sessions', [
+                'marketing_profile_id' => $marketing->id,
+                'day_name' => DayName::Sunday->value,
+            ]);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     public function test_marketing_can_store_tracking_points_idempotently(): void
@@ -140,18 +204,69 @@ class MarketingTrackingTest extends TestCase
         ]);
     }
 
-    public function test_marketing_cannot_start_second_active_tracking_session(): void
+    public function test_tracking_points_recover_to_the_authenticated_marketers_current_session(): void
     {
         [$marketing, $token] = $this->marketingToken('M01');
-        TrackingSession::factory()->active()->create(['marketing_profile_id' => $marketing->id]);
+        $session = TrackingSession::factory()->active()->create([
+            'marketing_profile_id' => $marketing->id,
+            'session_date' => CarbonImmutable::now(config('mms.timezone'))->toDateString(),
+        ]);
 
         $this->withToken($token)
-            ->post('/api/v1/tracking/sessions/start', [
-                'local_uuid' => (string) Str::uuid(),
-                'started_at' => '2026-07-20T08:05:00+07:00',
+            ->postJson('/api/v1/tracking/sessions/999999/points/batch', [
+                'points' => [$this->pointPayload()],
             ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('tracking_session');
+            ->assertCreated()
+            ->assertJsonPath('data.created_count', 1);
+
+        $this->assertDatabaseHas('tracking_points', [
+            'tracking_session_id' => $session->id,
+        ]);
+    }
+
+    public function test_stop_recovers_to_the_authenticated_marketers_current_session(): void
+    {
+        [$marketing, $token] = $this->marketingToken('M01');
+        $session = TrackingSession::factory()->active()->create([
+            'marketing_profile_id' => $marketing->id,
+            'session_date' => CarbonImmutable::now(config('mms.timezone'))->toDateString(),
+            'started_at' => CarbonImmutable::now(config('mms.timezone'))->subHour(),
+        ]);
+
+        $this->withToken($token)
+            ->postJson('/api/v1/tracking/sessions/999999/stop', [
+                'ended_at' => CarbonImmutable::now(config('mms.timezone'))->toIso8601String(),
+                'visit_count' => 0,
+                'distance_meters' => 0,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.id', $session->id)
+            ->assertJsonPath('data.status', TrackingStatus::Offline->value);
+    }
+
+    public function test_marketing_reuses_todays_active_tracking_session_when_start_is_retried(): void
+    {
+        CarbonImmutable::setTestNow('2026-07-20 08:05:00');
+
+        try {
+            [$marketing, $token] = $this->marketingToken('M01');
+            $session = TrackingSession::factory()->active()->create([
+                'marketing_profile_id' => $marketing->id,
+                'session_date' => '2026-07-20',
+            ]);
+
+            $this->withToken($token)
+                ->postJson('/api/v1/tracking/sessions/start', [
+                    'local_uuid' => (string) Str::uuid(),
+                    'started_at' => '2026-07-20T08:05:00+07:00',
+                ])
+                ->assertCreated()
+                ->assertJsonPath('data.session_id', $session->id);
+
+            $this->assertDatabaseCount('tracking_sessions', 1);
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
     }
 
     public function test_marketing_can_list_and_show_only_own_tracking_sessions(): void

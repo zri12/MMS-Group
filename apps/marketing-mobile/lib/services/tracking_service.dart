@@ -6,21 +6,35 @@ class TrackingPoint {
   final String localUuid;
   final double latitude;
   final double longitude;
+  final double? accuracyMeters;
+  final double? speedMps;
+  final double? heading;
+  final double? altitudeMeters;
   final String pointType;
   final DateTime recordedAt;
+  final DateTime? receivedAt;
 
   const TrackingPoint({
     required this.localUuid,
     required this.latitude,
     required this.longitude,
+    this.accuracyMeters,
+    this.speedMps,
+    this.heading,
+    this.altitudeMeters,
     required this.pointType,
     required this.recordedAt,
+    this.receivedAt,
   });
 
   Map<String, dynamic> toJson() => {
     'local_uuid': localUuid,
     'latitude': latitude,
     'longitude': longitude,
+    if (accuracyMeters != null) 'accuracy_meters': accuracyMeters,
+    if (speedMps != null) 'speed_mps': speedMps,
+    if (heading != null) 'heading': heading,
+    if (altitudeMeters != null) 'altitude_meters': altitudeMeters,
     'point_type': pointType,
     'recorded_at': recordedAt.toIso8601String(),
   };
@@ -30,8 +44,15 @@ class TrackingPoint {
       localUuid: json['local_uuid'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
+      accuracyMeters: (json['accuracy_meters'] as num?)?.toDouble(),
+      speedMps: (json['speed_mps'] as num?)?.toDouble(),
+      heading: (json['heading'] as num?)?.toDouble(),
+      altitudeMeters: (json['altitude_meters'] as num?)?.toDouble(),
       pointType: (json['point_type'] ?? 'Perjalanan') as String,
       recordedAt: DateTime.parse(json['recorded_at'] as String),
+      receivedAt: json['received_at'] is String
+          ? DateTime.tryParse(json['received_at'] as String)
+          : null,
     );
   }
 }
@@ -50,6 +71,7 @@ class TrackingSession {
   final int visitCount;
   final double distanceMeters;
   final List<TrackingPoint> points;
+  final TrackingPoint? latestPoint;
 
   const TrackingSession({
     required this.id,
@@ -61,6 +83,7 @@ class TrackingSession {
     required this.visitCount,
     required this.distanceMeters,
     this.points = const [],
+    this.latestPoint,
   });
 
   bool get isActive => endedAt == null;
@@ -81,6 +104,9 @@ class TrackingSession {
               ?.map((e) => TrackingPoint.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      latestPoint: json['latest_point'] is Map<String, dynamic>
+          ? TrackingPoint.fromJson(json['latest_point'] as Map<String, dynamic>)
+          : null,
     );
   }
 }

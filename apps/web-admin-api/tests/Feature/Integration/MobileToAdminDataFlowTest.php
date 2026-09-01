@@ -69,8 +69,10 @@ class MobileToAdminDataFlowTest extends TestCase
             'location_address' => 'Gedebage, Kota Bandung',
         ])->assertCreated();
 
+        $today = now(config('mms.timezone'))->toDateString();
+
         $this->actingAs($admin)
-            ->get('/admin/tracking?date=2026-07-20')
+            ->get('/admin/tracking?date='.$today)
             ->assertOk()
             ->assertSee('M01 - Nadia PDL')
             ->assertSee('data-markers="[{&quot;lat&quot;:-6.9388', false);

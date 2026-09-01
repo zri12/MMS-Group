@@ -22,7 +22,13 @@ String _initialsOf(String name) {
 class ProfileScreen extends StatelessWidget {
   final NavController nav;
   final AuthController auth;
-  const ProfileScreen({super.key, required this.nav, required this.auth});
+  final Future<void> Function()? onLogout;
+  const ProfileScreen({
+    super.key,
+    required this.nav,
+    required this.auth,
+    this.onLogout,
+  });
 
   Widget _menuItem(
     BuildContext context,
@@ -281,8 +287,12 @@ class ProfileScreen extends StatelessWidget {
       confirmLabel: 'Keluar',
       danger: true,
       onConfirm: () async {
-        await auth.logout();
-        nav.resetTo(AppScreen.login);
+        if (onLogout != null) {
+          await onLogout!();
+        } else {
+          await auth.logout();
+          nav.resetTo(AppScreen.login);
+        }
       },
     );
   }

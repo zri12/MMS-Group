@@ -128,22 +128,12 @@ class DashboardController extends Controller
             4 => DayName::Thursday,
             5 => DayName::Friday,
             6 => DayName::Saturday,
-            default => config('mms.testing.allow_sunday_operations', false)
-                ? DayName::Sunday
-                : DayName::Monday,
+            default => DayName::Sunday,
         };
     }
 
     private function defaultSelectedDate(): CarbonImmutable
     {
-        $latestReportDate = DailyOperationalReport::query()->max('report_date');
-
-        if (is_string($latestReportDate) && $latestReportDate !== '') {
-            return CarbonImmutable::parse($latestReportDate, config('app.timezone'));
-        }
-
-        $today = CarbonImmutable::now(config('app.timezone'))->startOfDay();
-
-        return $today->dayOfWeekIso === 7 ? $today->subDay() : $today;
+        return CarbonImmutable::now(config('mms.timezone'))->startOfDay();
     }
 }

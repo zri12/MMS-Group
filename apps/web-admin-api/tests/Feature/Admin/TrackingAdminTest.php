@@ -42,13 +42,14 @@ class TrackingAdminTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get('/admin/tracking?date=2026-07-20&status=Aktif')
+            ->get('/admin/tracking?date=2026-07-20')
             ->assertOk()
             ->assertSee('Tracking PDL')
             ->assertSee('data-tracking-map', false)
             ->assertSee('data-markers="[{&quot;lat&quot;:-6.9388', false)
             ->assertDontSee('data-markers=\'JSON.parse(', false)
             ->assertSee('M01 - Marketing M01')
+            ->assertSee('Offline')
             ->assertSee('Detail Tracking');
 
         $this->actingAs($admin)
@@ -104,15 +105,15 @@ class TrackingAdminTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->getJson('/admin/tracking/feed?date=2026-07-20&status=Aktif')
+            ->getJson('/admin/tracking/feed?date=2026-07-20')
             ->assertOk()
             ->assertJsonPath('data.markers.0.label', 'M01 - Marketing M01')
-            ->assertJsonPath('data.markers.0.status', 'Aktif')
+            ->assertJsonPath('data.markers.0.status', 'Offline')
             ->assertJsonPath('data.markers.0.lat', -6.9388)
             ->assertJsonPath('data.markers.0.lng', 107.7079);
     }
 
-    public function test_tracking_defaults_to_the_latest_session_date(): void
+    public function test_tracking_defaults_to_the_current_server_date(): void
     {
         CarbonImmutable::setTestNow('2026-07-26 09:00:00');
 
@@ -135,8 +136,8 @@ class TrackingAdminTest extends TestCase
             $this->actingAs($admin)
                 ->get('/admin/tracking')
                 ->assertOk()
-                ->assertSee('value="2026-07-25"', false)
-                ->assertSee('data-markers="[{&quot;lat&quot;:-6.9388', false);
+                ->assertSee('value="2026-07-26"', false)
+                ->assertDontSee('data-markers="[{&quot;lat&quot;:-6.9388', false);
         } finally {
             CarbonImmutable::setTestNow();
         }

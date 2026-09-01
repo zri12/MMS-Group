@@ -33,7 +33,7 @@ class StopTrackingSessionAction
                 ));
             }
 
-            $endedAt = CarbonImmutable::parse($data['ended_at']);
+            $endedAt = CarbonImmutable::now(config('mms.timezone'));
 
             if ($locked->status !== TrackingStatus::Active) {
                 return $locked->refresh()

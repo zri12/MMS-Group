@@ -41,18 +41,27 @@ class StartTrackingSessionAction
                 return $existing;
             }
 
+            // Session dates and times are authoritative server time. Device
+            // timestamps remain useful for GPS points but cannot open a
+            // session for a previous or future operational day.
+            $startedAt = CarbonImmutable::now(config('mms.timezone'));
             $scheduleId = $this->resolveScheduleId($marketing, $data['schedule_id'] ?? null);
-            $startedAt = CarbonImmutable::parse($data['started_at']);
 
-            $activeSessionExists = TrackingSession::query()
+            $activeSession = TrackingSession::query()
+                ->with(['marketingProfile.user', 'schedule', 'latestPoint'])
+                ->withCount('points')
                 ->where('marketing_profile_id', $marketing->id)
                 ->where('status', TrackingStatus::Active->value)
-                ->exists();
+                ->whereDate('session_date', $startedAt->toDateString())
+                ->latest('started_at')
+                ->lockForUpdate()
+                ->first();
 
-            if ($activeSessionExists) {
-                throw ValidationException::withMessages([
-                    'tracking_session' => 'Sesi tracking aktif masih berjalan.',
-                ]);
+            // A second request from the same device or a recovered app must
+            // resume today's session. Returning it is idempotent and avoids
+            // trapping the marketer behind a "session still active" error.
+            if ($activeSession) {
+                return $activeSession;
             }
 
             return TrackingSession::query()->create([

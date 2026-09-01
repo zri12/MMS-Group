@@ -118,6 +118,12 @@ class _AppShellState extends State<AppShell> {
   ScheduleService? get scheduleService => widget.scheduleService;
   TrackingService? get trackingService => widget.trackingService;
 
+  Future<void> _logout() async {
+    await tracking.stop();
+    await auth.logout();
+    nav.resetTo(AppScreen.login);
+  }
+
   Widget _createTabScreen(AppScreen screen) => switch (screen) {
     AppScreen.dashboard => DashboardScreen(
       nav: nav,
@@ -138,7 +144,7 @@ class _AppShellState extends State<AppShell> {
       auth: auth,
       tracking: tracking,
     ),
-    AppScreen.profile => ProfileScreen(nav: nav, auth: auth),
+    AppScreen.profile => ProfileScreen(nav: nav, auth: auth, onLogout: _logout),
     _ => throw ArgumentError.value(screen, 'screen', 'Bukan tab utama'),
   };
 
@@ -156,13 +162,15 @@ class _AppShellState extends State<AppShell> {
 
     return Stack(
       fit: StackFit.expand,
-      children: _cachedTabScreens.entries.map((entry) {
-        final isActive = entry.key == activeScreen;
-        return Offstage(
-          offstage: !isActive,
-          child: TickerMode(enabled: isActive, child: entry.value),
-        );
-      }).toList(growable: false),
+      children: _cachedTabScreens.entries
+          .map((entry) {
+            final isActive = entry.key == activeScreen;
+            return Offstage(
+              offstage: !isActive,
+              child: TickerMode(enabled: isActive, child: entry.value),
+            );
+          })
+          .toList(growable: false),
     );
   }
 
@@ -192,7 +200,11 @@ class _AppShellState extends State<AppShell> {
     final screen = nav.current.screen;
     return switch (screen) {
       AppScreen.splash => SplashScreen(nav: nav, auth: auth),
-      AppScreen.login => LoginScreen(nav: nav, auth: auth, locationService: location),
+      AppScreen.login => LoginScreen(
+        nav: nav,
+        auth: auth,
+        locationService: location,
+      ),
       AppScreen.permLocation ||
       AppScreen.permBg ||
       AppScreen.permNotification ||
@@ -283,7 +295,11 @@ class _AppShellState extends State<AppShell> {
         trackingService: trackingService,
       ),
       AppScreen.syncStatus => SyncStatusScreen(nav: nav),
-      AppScreen.profile => ProfileScreen(nav: nav, auth: auth),
+      AppScreen.profile => ProfileScreen(
+        nav: nav,
+        auth: auth,
+        onLogout: _logout,
+      ),
       AppScreen.permissionStatus => PermissionStatusScreen(nav: nav),
       AppScreen.accountInfo => AccountInfoScreen(nav: nav, auth: auth),
       AppScreen.usageGuide => UsageGuideScreen(nav: nav),

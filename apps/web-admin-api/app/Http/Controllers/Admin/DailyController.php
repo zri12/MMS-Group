@@ -23,8 +23,14 @@ class DailyController extends Controller
 {
     public function __invoke(Request $request): View
     {
-        $selectedDay = DayName::tryFrom($request->string('day')->toString()) ?? DayName::Monday;
-        $date = $this->dateForDay($request->string('date')->toString(), $selectedDay);
+        $requestedDay = DayName::tryFrom($request->string('day')->toString());
+        $requestedDate = $request->string('date')->toString();
+        $date = $requestedDate !== ''
+            ? $this->dateForDay($requestedDate, $requestedDay ?? DayName::Monday)
+            : ($requestedDay
+                ? $this->dateForDay('', $requestedDay)
+                : CarbonImmutable::now(config('mms.timezone'))->startOfDay());
+        $selectedDay = $requestedDay ?? $this->dayFromDate($date);
 
         // ── Counters ──────────────────────────────────────────────────────
         $counters = [
@@ -88,6 +94,19 @@ class DailyController extends Controller
             DayName::Friday => $today->startOfWeek()->addDays(4),
             DayName::Saturday => $today->startOfWeek()->addDays(5),
             DayName::Sunday => $today->startOfWeek()->addDays(6),
+        };
+    }
+
+    private function dayFromDate(CarbonImmutable $date): DayName
+    {
+        return match ($date->dayOfWeekIso) {
+            1 => DayName::Monday,
+            2 => DayName::Tuesday,
+            3 => DayName::Wednesday,
+            4 => DayName::Thursday,
+            5 => DayName::Friday,
+            6 => DayName::Saturday,
+            default => DayName::Sunday,
         };
     }
 }

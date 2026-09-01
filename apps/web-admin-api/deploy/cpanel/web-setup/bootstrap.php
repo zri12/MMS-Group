@@ -52,7 +52,16 @@ function cpanel_setup_bootstrap_application(): void
         return;
     }
 
-    $application = require cpanel_setup_base_path().'/bootstrap/app.php';
+    $basePath = cpanel_setup_base_path();
+    $autoload = $basePath.'/vendor/autoload.php';
+
+    if (! is_file($autoload)) {
+        throw new RuntimeException('Dependensi Laravel tidak ditemukan. Pastikan folder vendor dari paket aplikasi telah diekstrak di root proyek.');
+    }
+
+    require_once $autoload;
+
+    $application = require $basePath.'/bootstrap/app.php';
     $publicPath = getenv('MMS_CPANEL_PUBLIC_PATH');
 
     if (is_string($publicPath) && $publicPath !== '' && is_dir($publicPath)) {
@@ -64,7 +73,7 @@ function cpanel_setup_bootstrap_application(): void
 }
 
 /**
- * @param array<string, mixed> $parameters
+ * @param  array<string, mixed>  $parameters
  */
 function cpanel_setup_run(string $command, array $parameters = []): string
 {
